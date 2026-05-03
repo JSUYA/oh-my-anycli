@@ -38,11 +38,24 @@ copyrightable expression.
 
 ## What It Provides
 
-- 35 skills for review, testing, documentation, DevOps, database, API, security, and language-specific coding workflows (C/C++, Rust, C#, Tizen).
-- 36 slash commands that route common tasks to those skills.
+- 36 skills for review, testing, documentation, DevOps, database, API, security, language-specific coding workflows (C/C++, Rust, C#, Tizen), and behavioral guidelines (Karpathy guidelines).
+- 37 slash commands that route common tasks to those skills.
 - 10 subagents pinned to `model: cline/default` for openclineclicode compatibility.
 - A Bash `omc` helper for listing, searching, installing, updating, and diagnosing the collection.
 - A plugin slot for team- or project-specific extensions.
+
+## Coding Advantages Over Plain cline CLI
+
+oh-my-clinecli does not change the model that cline uses. It improves coding outcomes by turning common development tasks into reusable workflows with explicit checks.
+
+- **Feature work becomes more disciplined.** Skills can steer the agent to read existing patterns first, make scoped changes, and report verification instead of producing an isolated patch.
+- **Runtime fixes become more evidence-based.** Debugging-oriented workflows encourage reproduction, stack-trace reading, dependency checks, ranked root-cause hypotheses, and minimal fixes.
+- **Reviews become more consistent.** `/review` and the code-reviewer agent focus on correctness, regressions, missing tests, security issues, and file-level evidence.
+- **Tests are less likely to be skipped.** `/test`, test-writing skills, and coverage workflows make it natural to add or run relevant tests after code changes.
+- **Specialized domains get targeted criteria.** Security, database, Dockerfile, CI, release, API, and documentation tasks each get their own checklist instead of relying on a generic prompt.
+- **Project standards are reusable.** The same commands, skills, and subagents can be versioned, reviewed, installed, updated, and extended through plugins.
+
+Plain cline CLI is still the simpler choice for very small one-off edits. oh-my-clinecli pays off when implementation, debugging, review, and verification need to happen as one repeatable development loop.
 
 ## Install
 
