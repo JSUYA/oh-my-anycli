@@ -80,21 +80,29 @@ never appears, continue to the workarounds below.
 (Opt-out: `opencode-anycli --no-tty` or `OPENCODE_ANYCLI_TTY=0` for
 unattended / CI runs where cline must not consume stdin.)
 
-## Step 2 — Workaround A: passwordless sudo for specific commands
+## Step 2 — Workaround A: passwordless sudo for the package manager (RECOMMENDED)
 
-Most reliable. Add a sudoers entry for ONLY the commands the agent
-needs:
+**Easiest, most reliable.** opencode-anycli ships an installer that
+auto-detects the user's package manager and writes a scoped sudoers
+rule:
 
 ```bash
-sudo visudo -f /etc/sudoers.d/opencode-anycli
-# add line(s) like:
-%admin ALL=(ALL) NOPASSWD: /usr/bin/apt-get update, /usr/bin/apt-get install
-# or for your user specifically:
-junsu ALL=(ALL) NOPASSWD: /usr/sbin/restart-mydb
+opencode-anycli --setup-sudo            # interactive: detect + confirm + apply
+opencode-anycli --setup-sudo --yes      # non-interactive
+opencode-anycli --setup-sudo --print    # preview without writing
+opencode-anycli --setup-sudo --remove   # undo
 ```
 
-Now `sudo apt-get update` runs without prompting. Limit the command list
-to what the agent really needs — do NOT use `NOPASSWD: ALL`.
+It supports `apt`/`dnf`/`yum`/`pacman`/`zypper`/`apk`. macOS short-
+circuits with a no-op (Homebrew does not need sudo). Validates with
+`visudo` before installing.
+
+After this, `sudo apt-get install <pkg>` runs without prompting from
+inside opencode-anycli sessions.
+
+If the user wants additional non-package-manager commands whitelisted,
+they can append to `/etc/sudoers.d/opencode-anycli` manually with
+`sudo visudo`. Always keep the list scoped — **never `NOPASSWD: ALL`**.
 
 ## Step 3 — Workaround B: SUDO_ASKPASS helper
 

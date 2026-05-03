@@ -108,12 +108,24 @@ opencode-anycli --update          # git pull + ./install.sh inside opencode-anyc
 ## Interactive Subprocesses (sudo, ssh-add, ...)
 
 opencode-anycli keeps the cline subprocess's stdin connected to your
-terminal by default, so prompts from `sudo`, `ssh-add`, `gh auth login`,
-etc. can read input. If a prompt still fails (because the inner bash
-tool doesn't forward stdin), use the `/sudo` slash command — it invokes
-the `sudo-helper` skill and walks you through three workarounds
-(passwordless sudo for specific commands, `SUDO_ASKPASS`, or
-pre-authorized sudo cache).
+terminal by default. If `sudo apt install ...` (or any package-manager
+command) still fails because the inner bash tool doesn't forward stdin,
+the wrapper ships an auto-installer for a scoped sudoers rule:
+
+```bash
+opencode-anycli --setup-sudo            # interactive: detect + confirm + apply
+opencode-anycli --setup-sudo --yes      # non-interactive
+opencode-anycli --setup-sudo --print    # preview, do not write
+opencode-anycli --setup-sudo --remove   # undo
+```
+
+It auto-detects `apt`/`dnf`/`yum`/`pacman`/`zypper`/`apk`, writes a
+scoped `/etc/sudoers.d/opencode-anycli` (NEVER `NOPASSWD: ALL`),
+validates with `visudo`. macOS short-circuits (Homebrew = no sudo).
+
+For prompts beyond the package manager (ssh-add, gh auth login),
+use `/sudo` — invokes the `sudo-helper` skill that walks you through
+SUDO_ASKPASS or pre-authorising the sudo cache.
 
 To opt out (CI / piped input):
 
