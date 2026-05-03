@@ -1,24 +1,43 @@
 # Update Flow
 
-This document describes the update flow workflow for oh-my-anycli.
+Updates pull the latest repository content and reapply artifacts into the target opencode-anycli config directory.
 
-## Purpose
-
-Use this guide to understand how the related skills, commands, agents, or installer behavior should be authored and maintained.
-
-## Guidelines
-
-- Keep all user-facing text in English.
-- Keep changes scoped to the relevant artifact.
-- Preserve frontmatter fields required by the lint scripts.
-- Prefer local project context over invented assumptions.
-- Verify changes with the repository test scripts before publishing.
-
-## Validation
+## Standard update
 
 ```bash
-bash tests/lint-skills.sh
-bash tests/lint-commands.sh
-bash tests/lint-agents.sh
-bash tests/verify-install.sh
+omac update
+```
+
+This runs:
+
+```bash
+git pull --ff-only
+./install.sh --reapply
+```
+
+## Pruning stale artifacts
+
+```bash
+omac update --prune
+```
+
+This also removes files that were installed previously but no longer exist in the current repository or plugin set. Removal is limited to files listed in `$OMAC_TARGET_DIR/.oh-my-anycli/manifest.txt`.
+
+## Manual equivalent
+
+```bash
+cd ~/.oh-my-anycli
+git pull --ff-only
+./install.sh --reapply --prune
+```
+
+## Conflict handling
+
+If `git pull --ff-only` fails, resolve local checkout changes manually before updating. Do not use force reset unless you intentionally want to discard local modifications.
+
+## After update
+
+```bash
+omac doctor
+omac list -v
 ```

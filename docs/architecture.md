@@ -1,24 +1,41 @@
 # Architecture
 
-This document describes the architecture workflow for oh-my-anycli.
+oh-my-anycli is a markdown-first artifact collection for opencode-anycli. It has no TypeScript or Python runtime; installation and maintenance are handled by Bash scripts.
 
-## Purpose
+## Repository layout
 
-Use this guide to understand how the related skills, commands, agents, or installer behavior should be authored and maintained.
+| Path | Purpose |
+| --- | --- |
+| `skills/<name>/SKILL.md` | Reusable workflow instructions with YAML frontmatter. |
+| `commands/<name>.md` | Slash command wrappers that route a user request to a workflow. |
+| `agents/<name>.md` | Subagent definitions pinned to `model: cline/default`. |
+| `plugins/<name>/` | Optional shareable extension packages. |
+| `custom/` | Local-only user additions; not managed as upstream artifacts. |
+| `install.sh` | Copies artifacts into the opencode-anycli target config. |
+| `update.sh` | Runs `git pull --ff-only` and reapplies installed artifacts. |
+| `uninstall.sh` | Removes only manifest-tracked installed files. |
+| `omac` | Helper CLI for list/search/info/plugin/update/doctor commands. |
+| `tests/` | Shell lint and installation verification scripts. |
 
-## Guidelines
+## Installation model
 
-- Keep all user-facing text in English.
-- Keep changes scoped to the relevant artifact.
-- Preserve frontmatter fields required by the lint scripts.
-- Prefer local project context over invented assumptions.
-- Verify changes with the repository test scripts before publishing.
+`install.sh` resolves an install directory, resolves the target config directory, copies artifacts, records every installed file in a manifest, and optionally creates an `omac` symlink.
 
-## Validation
+Plugins are installed with prefixed names:
 
-```bash
-bash tests/lint-skills.sh
-bash tests/lint-commands.sh
-bash tests/lint-agents.sh
-bash tests/verify-install.sh
-```
+- plugin skill: `skills/<plugin>__<skill>/SKILL.md`
+- plugin command: `commands/<plugin>__<command>.md`
+- plugin agent: `agents/<plugin>__<agent>.md`
+
+## Compatibility constraints
+
+- Agents must declare `model: cline/default`.
+- Skills must use a `SKILL.md` file under a directory named after the skill.
+- Commands and agents are top-level markdown files.
+- Shell scripts are written for portable Bash and standard Unix tools.
+
+## Safety properties
+
+- Uninstall and prune use the manifest instead of deleting whole directories blindly.
+- Existing installed files are skipped unless `--force` or `--reapply` is used.
+- Plugin agents with missing or unsupported models are rejected during install.

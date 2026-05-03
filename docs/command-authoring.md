@@ -1,24 +1,42 @@
 # Command Authoring
 
-This document describes the command authoring workflow for oh-my-anycli.
+Commands are slash-command wrappers stored as `commands/<name>.md`.
 
-## Purpose
+## Frontmatter
 
-Use this guide to understand how the related skills, commands, agents, or installer behavior should be authored and maintained.
+```yaml
+---
+description: Review CI configuration for common safety and reliability issues.
+argument_hint: "[optional target]"
+allowed_tools: [bash, read, grep]
+---
+```
+
+Required fields:
+
+- `description`
+- `argument_hint`
+- `allowed_tools`
+
+## Body
+
+Wrap instructions in `<command-instruction>` and keep them scoped:
+
+```markdown
+<command-instruction>
+Run the matching skill when one exists. Inspect local project context first. Do not perform destructive Git, filesystem, or network operations unless explicitly requested.
+</command-instruction>
+```
 
 ## Guidelines
 
-- Keep all user-facing text in English.
-- Keep changes scoped to the relevant artifact.
-- Preserve frontmatter fields required by the lint scripts.
-- Prefer local project context over invented assumptions.
-- Verify changes with the repository test scripts before publishing.
+- Commands should route, constrain, and summarize; detailed workflow belongs in a skill.
+- Use the same name as the matching skill when practical.
+- Keep tool lists minimal for the workflow.
+- Preserve file paths, command names, and identifiers exactly.
 
 ## Validation
 
 ```bash
-bash tests/lint-skills.sh
 bash tests/lint-commands.sh
-bash tests/lint-agents.sh
-bash tests/verify-install.sh
 ```

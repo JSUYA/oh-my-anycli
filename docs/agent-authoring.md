@@ -1,24 +1,47 @@
 # Agent Authoring
 
-This document describes the agent authoring workflow for oh-my-anycli.
+Agents are subagent definitions stored as `agents/<name>.md`.
 
-## Purpose
+## Frontmatter
 
-Use this guide to understand how the related skills, commands, agents, or installer behavior should be authored and maintained.
+```yaml
+---
+name: code-reviewer
+description: Specialist subagent for reviewing source diffs.
+mode: subagent
+model: cline/default
+tools:
+  bash: true
+  read: true
+  grep: true
+---
+```
+
+Required constraints:
+
+- `mode` must be `subagent`.
+- `model` must be `cline/default`.
+- Tool access must be explicit.
+
+## Body
+
+Each agent should define:
+
+- mission
+- operating principles
+- workflow
+- output expectations
+- safety boundaries
 
 ## Guidelines
 
-- Keep all user-facing text in English.
-- Keep changes scoped to the relevant artifact.
-- Preserve frontmatter fields required by the lint scripts.
-- Prefer local project context over invented assumptions.
-- Verify changes with the repository test scripts before publishing.
+- Keep agents specialized and reusable.
+- Prefer read-only behavior unless the role needs edits.
+- Cite files, commands, and observed behavior when making claims.
+- Do not allow destructive actions without explicit user approval.
 
 ## Validation
 
 ```bash
-bash tests/lint-skills.sh
-bash tests/lint-commands.sh
 bash tests/lint-agents.sh
-bash tests/verify-install.sh
 ```

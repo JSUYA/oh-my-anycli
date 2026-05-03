@@ -1,20 +1,46 @@
 # Team Deployment
 
-This document describes the team deployment workflow for oh-my-anycli.
+Teams can use oh-my-anycli as a shared baseline and extend it with plugins or a fork.
 
-## Purpose
+## Recommended models
 
-Use this guide to understand how the related skills, commands, agents, or installer behavior should be authored and maintained.
+| Model | Use when |
+| --- | --- |
+| Upstream repo + plugins | Teams want to receive upstream updates and maintain separate internal artifacts. |
+| Fork | Teams need to change default artifacts, installer behavior, or policy. |
+| Local `custom/` | One developer needs private local artifacts that should not be shared. |
 
-## Guidelines
+## Plugin-based deployment
 
-- Keep all user-facing text in English.
-- Keep changes scoped to the relevant artifact.
-- Preserve frontmatter fields required by the lint scripts.
-- Prefer local project context over invented assumptions.
-- Verify changes with the repository test scripts before publishing.
+1. Create a plugin repository with `plugin.json` and artifacts.
+2. Install the core collection.
+3. Add the team plugin:
 
-## Validation
+```bash
+omac plugin add <team-plugin-git-url>
+omac doctor
+```
+
+## Fork-based deployment
+
+Set `OMAC_REPO_URL` when using the auto-clone path:
+
+```bash
+OMAC_REPO_URL=<team-fork-git-url> install.sh
+```
+
+Keep fork-specific policy in docs and tests so updates remain reviewable.
+
+## Update policy
+
+Use fast-forward updates for the core checkout:
+
+```bash
+omac update
+omac update --prune
+```
+
+Run validation before publishing team changes:
 
 ```bash
 bash tests/lint-skills.sh

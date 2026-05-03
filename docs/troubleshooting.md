@@ -1,20 +1,65 @@
 # Troubleshooting
 
-This document describes the troubleshooting workflow for oh-my-anycli.
+## `omac` command not found
 
-## Purpose
+Check where the installer linked it:
 
-Use this guide to understand how the related skills, commands, agents, or installer behavior should be authored and maintained.
+```bash
+ls -l /usr/local/bin/omac ~/.local/bin/omac 2>/dev/null
+```
 
-## Guidelines
+If it is in `~/.local/bin`, ensure that directory is in `PATH`.
 
-- Keep all user-facing text in English.
-- Keep changes scoped to the relevant artifact.
-- Preserve frontmatter fields required by the lint scripts.
-- Prefer local project context over invented assumptions.
-- Verify changes with the repository test scripts before publishing.
+## Artifacts are not visible in opencode-anycli
 
-## Validation
+Run:
+
+```bash
+omac doctor
+omac list -v
+```
+
+Confirm `OMAC_TARGET_DIR` matches the opencode-anycli config directory you actually use.
+
+## Existing files were not overwritten
+
+This is expected for a normal install. Reapply with overwrite:
+
+```bash
+~/.oh-my-anycli/install.sh --reapply
+```
+
+## Removed upstream files are still installed
+
+Use prune:
+
+```bash
+omac update --prune
+```
+
+Prune only removes files recorded in the install manifest.
+
+## Agent is skipped during install
+
+Agents must declare:
+
+```yaml
+mode: subagent
+model: cline/default
+```
+
+Unsupported or missing models are rejected because opencode-anycli exposes `cline/default`.
+
+## Plugin does not install
+
+Check that the plugin directory contains `plugin.json` and at least one valid artifact directory.
+
+```bash
+omac plugin list
+omac info <artifact-name>
+```
+
+## Validation commands
 
 ```bash
 bash tests/lint-skills.sh
