@@ -5,32 +5,36 @@
 # Disable colors entirely by setting NO_COLOR=1 in the environment, or when
 # stdout is not a TTY.
 
+# Use $'...' literals so the escape bytes are baked into each variable at
+# definition time. Then ${OMAC_COLOR_*} expands correctly inside cat <<EOF,
+# echo, and printf uniformly. Raw "\033[..." strings only render via printf %b
+# and would print as literal text from heredocs / echo.
 if [ -t 1 ] && [ "${NO_COLOR:-0}" != "1" ]; then
-  OMC_COLOR_RESET="\033[0m"
-  OMC_COLOR_BOLD="\033[1m"
-  OMC_COLOR_DIM="\033[2m"
-  OMC_COLOR_RED="\033[31m"
-  OMC_COLOR_GREEN="\033[32m"
-  OMC_COLOR_YELLOW="\033[33m"
-  OMC_COLOR_BLUE="\033[34m"
-  OMC_COLOR_MAGENTA="\033[35m"
-  OMC_COLOR_CYAN="\033[36m"
+  OMAC_COLOR_RESET=$'\033[0m'
+  OMAC_COLOR_BOLD=$'\033[1m'
+  OMAC_COLOR_DIM=$'\033[2m'
+  OMAC_COLOR_RED=$'\033[31m'
+  OMAC_COLOR_GREEN=$'\033[32m'
+  OMAC_COLOR_YELLOW=$'\033[33m'
+  OMAC_COLOR_BLUE=$'\033[34m'
+  OMAC_COLOR_MAGENTA=$'\033[35m'
+  OMAC_COLOR_CYAN=$'\033[36m'
 else
-  OMC_COLOR_RESET=""
-  OMC_COLOR_BOLD=""
-  OMC_COLOR_DIM=""
-  OMC_COLOR_RED=""
-  OMC_COLOR_GREEN=""
-  OMC_COLOR_YELLOW=""
-  OMC_COLOR_BLUE=""
-  OMC_COLOR_MAGENTA=""
-  OMC_COLOR_CYAN=""
+  OMAC_COLOR_RESET=""
+  OMAC_COLOR_BOLD=""
+  OMAC_COLOR_DIM=""
+  OMAC_COLOR_RED=""
+  OMAC_COLOR_GREEN=""
+  OMAC_COLOR_YELLOW=""
+  OMAC_COLOR_BLUE=""
+  OMAC_COLOR_MAGENTA=""
+  OMAC_COLOR_CYAN=""
 fi
 
-omc_color_red()    { printf "%b%s%b" "$OMC_COLOR_RED"    "$1" "$OMC_COLOR_RESET"; }
-omc_color_green()  { printf "%b%s%b" "$OMC_COLOR_GREEN"  "$1" "$OMC_COLOR_RESET"; }
-omc_color_yellow() { printf "%b%s%b" "$OMC_COLOR_YELLOW" "$1" "$OMC_COLOR_RESET"; }
-omc_color_blue()   { printf "%b%s%b" "$OMC_COLOR_BLUE"   "$1" "$OMC_COLOR_RESET"; }
-omc_color_cyan()   { printf "%b%s%b" "$OMC_COLOR_CYAN"   "$1" "$OMC_COLOR_RESET"; }
-omc_color_bold()   { printf "%b%s%b" "$OMC_COLOR_BOLD"   "$1" "$OMC_COLOR_RESET"; }
-omc_color_dim()    { printf "%b%s%b" "$OMC_COLOR_DIM"    "$1" "$OMC_COLOR_RESET"; }
+omac_color_red()    { printf "%b%s%b" "$OMAC_COLOR_RED"    "$1" "$OMAC_COLOR_RESET"; }
+omac_color_green()  { printf "%b%s%b" "$OMAC_COLOR_GREEN"  "$1" "$OMAC_COLOR_RESET"; }
+omac_color_yellow() { printf "%b%s%b" "$OMAC_COLOR_YELLOW" "$1" "$OMAC_COLOR_RESET"; }
+omac_color_blue()   { printf "%b%s%b" "$OMAC_COLOR_BLUE"   "$1" "$OMAC_COLOR_RESET"; }
+omac_color_cyan()   { printf "%b%s%b" "$OMAC_COLOR_CYAN"   "$1" "$OMAC_COLOR_RESET"; }
+omac_color_bold()   { printf "%b%s%b" "$OMAC_COLOR_BOLD"   "$1" "$OMAC_COLOR_RESET"; }
+omac_color_dim()    { printf "%b%s%b" "$OMAC_COLOR_DIM"    "$1" "$OMAC_COLOR_RESET"; }

@@ -26,7 +26,7 @@ copyrightable expression.
   exactly one model id
 - **Functional agent names** (`code-reviewer`, `dba`, `release-manager`)
   instead of literary character names — easier for new contributors to read
-- **`omc plugin add <git-url>`** allows third-party plugins from any git host;
+- **`omac plugin add <git-url>`** allows third-party plugins from any git host;
   upstream forks typically only accept PRs to a single monorepo
 - **Coding-language-specific skills** added: C/C++ (`cpp-modernize`,
   `cpp-static-analysis`, `cmake-review`), Rust (`rust-clippy-triage`,
@@ -39,7 +39,7 @@ copyrightable expression.
 - 36 skills for review, testing, documentation, DevOps, database, API, security, language-specific coding workflows (C/C++, Rust, C#, Tizen), and behavioral guidelines (Karpathy guidelines).
 - 37 slash commands that route common tasks to those skills.
 - 10 subagents pinned to `model: cline/default` for opencode-anycli compatibility.
-- A Bash `omc` helper for listing, searching, installing, updating, and diagnosing the collection.
+- A Bash `omac` helper for listing, searching, installing, updating, and diagnosing the collection.
 - A plugin slot for team- or project-specific extensions.
 
 ## Coding Advantages Over Plain cline CLI
@@ -60,7 +60,7 @@ Plain cline CLI is still the simpler choice for very small one-off edits. oh-my-
 ```bash
 git clone https://github.com/JSUYA/oh-my-anycli.git ~/.oh-my-anycli
 ~/.oh-my-anycli/install.sh
-omc doctor
+omac doctor
 ```
 
 opencode-anycli should be installed first so the target config directory exists.
@@ -68,7 +68,7 @@ opencode-anycli should be installed first so the target config directory exists.
 ## Uninstall
 
 ```bash
-~/.oh-my-anycli/uninstall.sh                       # remove omc symlink + manifested files
+~/.oh-my-anycli/uninstall.sh                       # remove omac symlink + manifested files
 ~/.oh-my-anycli/uninstall.sh --remove-install-dir  # also delete ~/.oh-my-anycli itself
 ~/.oh-my-anycli/uninstall.sh --yes                 # skip confirmation prompts
 ```
@@ -81,12 +81,12 @@ authored yourself in the same directory are left intact.
 
 | Command | Purpose |
 | --- | --- |
-| `omc list [-v]` | List installed skills, commands, agents, and plugins. |
-| `omc search <keyword>` | Search frontmatter metadata. |
-| `omc info <name>` | Show one artifact's frontmatter. |
-| `omc plugin add <git-url>` | Add an external plugin. |
-| `omc update` | Pull and reapply the collection. |
-| `omc doctor` | Check installation status. |
+| `omac list [-v]` | List installed skills, commands, agents, and plugins. |
+| `omac search <keyword>` | Search frontmatter metadata. |
+| `omac info <name>` | Show one artifact's frontmatter. |
+| `omac plugin add <git-url>` | Add an external plugin. |
+| `omac update` | Pull and reapply the collection. |
+| `omac doctor` | Check installation status. |
 
 ## Documentation
 

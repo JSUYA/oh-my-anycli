@@ -17,17 +17,17 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 # shellcheck source=../lib/log.sh
 . "$ROOT_DIR/lib/log.sh"
 
-tmpdir="$(mktemp -d -t omc-verify-XXXXXX)"
+tmpdir="$(mktemp -d -t omac-verify-XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
-omc_log_step "tmpdir: $tmpdir"
+omac_log_step "tmpdir: $tmpdir"
 
 fake_target="$tmpdir/fake-config/opencode-anycli"
 mkdir -p "$fake_target"
 
-omc_log_step "running install.sh in isolated target"
-OMC_INSTALL_DIR="$ROOT_DIR" \
-OMC_TARGET_DIR="$fake_target" \
+omac_log_step "running install.sh in isolated target"
+OMAC_INSTALL_DIR="$ROOT_DIR" \
+OMAC_TARGET_DIR="$fake_target" \
 "$ROOT_DIR/install.sh" --no-symlink
 
 # Count expected artifacts in the source tree.
@@ -44,9 +44,9 @@ failures=0
 check_eq() {
   local label="$1" want="$2" got="$3"
   if [ "$want" = "$got" ]; then
-    omc_log_check ok "$label: $got"
+    omac_log_check ok "$label: $got"
   else
-    omc_log_check fail "$label: expected $want, got $got"
+    omac_log_check fail "$label: expected $want, got $got"
     failures=$(( failures + 1 ))
   fi
 }
@@ -56,39 +56,39 @@ check_eq "commands installed" "$expected_commands" "$actual_commands"
 check_eq "agents installed"   "$expected_agents"   "$actual_agents"
 
 # Idempotency: a second run should not change file count.
-omc_log_step "checking idempotent second run"
-OMC_INSTALL_DIR="$ROOT_DIR" \
-OMC_TARGET_DIR="$fake_target" \
+omac_log_step "checking idempotent second run"
+OMAC_INSTALL_DIR="$ROOT_DIR" \
+OMAC_TARGET_DIR="$fake_target" \
 "$ROOT_DIR/install.sh" --no-symlink >/dev/null
 
 actual_skills2=$(find "$fake_target/skills" -mindepth 2 -name SKILL.md 2>/dev/null | wc -l | tr -d ' ')
 check_eq "skills after re-run" "$actual_skills" "$actual_skills2"
 
 # --reapply path overwrites identical files without error.
-omc_log_step "checking --reapply path"
-OMC_INSTALL_DIR="$ROOT_DIR" \
-OMC_TARGET_DIR="$fake_target" \
+omac_log_step "checking --reapply path"
+OMAC_INSTALL_DIR="$ROOT_DIR" \
+OMAC_TARGET_DIR="$fake_target" \
 "$ROOT_DIR/install.sh" --reapply --no-symlink >/dev/null
 
 # Manifest must have been written.
 if [ -s "$fake_target/.oh-my-anycli/manifest.txt" ]; then
-  omc_log_check ok "manifest written"
+  omac_log_check ok "manifest written"
 else
-  omc_log_check fail "manifest missing or empty"
+  omac_log_check fail "manifest missing or empty"
   failures=$(( failures + 1 ))
 fi
 
 # Built-in skill content sanity: code-review SKILL.md should include its title.
 if grep -q "Code Review Skill" "$fake_target/skills/code-review/SKILL.md" 2>/dev/null; then
-  omc_log_check ok "code-review SKILL.md content sanity"
+  omac_log_check ok "code-review SKILL.md content sanity"
 else
-  omc_log_check fail "code-review SKILL.md missing or empty"
+  omac_log_check fail "code-review SKILL.md missing or empty"
   failures=$(( failures + 1 ))
 fi
 
 printf "\n"
 if [ "$failures" -gt 0 ]; then
-  omc_log_error "verify-install failed with $failures issue(s)"
+  omac_log_error "verify-install failed with $failures issue(s)"
   exit 1
 fi
-omc_log_ok "verify-install passed"
+omac_log_ok "verify-install passed"

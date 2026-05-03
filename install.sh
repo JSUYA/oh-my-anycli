@@ -8,16 +8,16 @@
 # Usage:
 #   ./install.sh                # idempotent: skips files that already exist
 #   ./install.sh --force        # overwrite existing files
-#   ./install.sh --reapply      # alias of --force, used by `omc reapply`
+#   ./install.sh --reapply      # alias of --force, used by `omac reapply`
 #   ./install.sh --prune        # remove installed artifacts no longer in repo
-#   ./install.sh --user         # symlink omc into ~/.local/bin instead of /usr/local/bin
+#   ./install.sh --user         # symlink omac into ~/.local/bin instead of /usr/local/bin
 #   ./install.sh --system       # use sudo to symlink into /usr/local/bin
-#   ./install.sh --no-symlink   # do not create the omc symlink at all
+#   ./install.sh --no-symlink   # do not create the omac symlink at all
 #
 # Environment:
-#   OMC_INSTALL_DIR   override install location (default: ~/.oh-my-anycli)
-#   OMC_TARGET_DIR    override opencode-anycli config dir
-#   OMC_REPO_URL      override the repo URL used by initial clone
+#   OMAC_INSTALL_DIR   override install location (default: ~/.oh-my-anycli)
+#   OMAC_TARGET_DIR    override opencode-anycli config dir
+#   OMAC_REPO_URL      override the repo URL used by initial clone
 #
 set -euo pipefail
 
@@ -30,10 +30,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "$SCRIPT_DIR/lib/common.sh"
 
 # Repository URL used by the auto-clone path (only when the script is run
-# from outside an existing checkout AND OMC_INSTALL_DIR points at a
+# from outside an existing checkout AND OMAC_INSTALL_DIR points at a
 # non-existent directory). In a team fork, override with:
-#   OMC_REPO_URL=https://git.example.com/<your-org>/oh-my-anycli.git
-DEFAULT_REPO_URL="${OMC_REPO_URL:-https://github.com/JSUYA/oh-my-anycli.git}"
+#   OMAC_REPO_URL=https://git.example.com/<your-org>/oh-my-anycli.git
+DEFAULT_REPO_URL="${OMAC_REPO_URL:-https://github.com/JSUYA/oh-my-anycli.git}"
 
 force=""
 prune=0
@@ -51,34 +51,34 @@ while [ $# -gt 0 ]; do
       exit 0
       ;;
     *)
-      omc_die "unknown flag: $1"
+      omac_die "unknown flag: $1"
       ;;
   esac
   shift
 done
 
-TARGET_DIR="$(omc_target_dir)"
+TARGET_DIR="$(omac_target_dir)"
 
 # 1. Resolve INSTALL_DIR.
 #    Order of precedence:
-#      a) OMC_INSTALL_DIR env (if set AND points at an existing checkout)
+#      a) OMAC_INSTALL_DIR env (if set AND points at an existing checkout)
 #      b) The script's own location, if it contains install.sh + lib/ (i.e. we're
 #         already running from a checkout — `git clone && ./install.sh` case)
 #      c) Default ~/.oh-my-anycli; clone into it if absent
 #
 #    This keeps `git clone <repo> && cd <repo> && ./install.sh` working without
-#    requiring OMC_INSTALL_DIR, and also makes re-running from inside an
+#    requiring OMAC_INSTALL_DIR, and also makes re-running from inside an
 #    existing checkout idempotent (no spurious clone attempt).
-if [ -n "${OMC_INSTALL_DIR:-}" ] && [ -d "${OMC_INSTALL_DIR}" ]; then
-  INSTALL_DIR="${OMC_INSTALL_DIR}"
+if [ -n "${OMAC_INSTALL_DIR:-}" ] && [ -d "${OMAC_INSTALL_DIR}" ]; then
+  INSTALL_DIR="${OMAC_INSTALL_DIR}"
 elif [ -f "$SCRIPT_DIR/install.sh" ] && [ -d "$SCRIPT_DIR/lib" ] && [ -d "$SCRIPT_DIR/skills" ]; then
   INSTALL_DIR="$SCRIPT_DIR"
 else
-  INSTALL_DIR="${OMC_INSTALL_DIR:-$HOME/.oh-my-anycli}"
+  INSTALL_DIR="${OMAC_INSTALL_DIR:-$HOME/.oh-my-anycli}"
   if [ ! -d "$INSTALL_DIR" ]; then
-    omc_log_step "Cloning oh-my-anycli into $INSTALL_DIR"
+    omac_log_step "Cloning oh-my-anycli into $INSTALL_DIR"
     if ! command -v git >/dev/null 2>&1; then
-      omc_die "git is not installed; install git and retry."
+      omac_die "git is not installed; install git and retry."
     fi
     git clone "$DEFAULT_REPO_URL" "$INSTALL_DIR"
     # Re-exec from the cloned location so subsequent paths resolve correctly.
@@ -90,14 +90,14 @@ fi
 #    oh-my-anycli only writes into subdirs (skills/command/agent), so creating
 #    the parent is harmless even before opencode-anycli itself runs.
 if [ ! -d "$TARGET_DIR" ]; then
-  omc_log_warn "Target config directory does not exist; creating it."
-  omc_log_warn "Install opencode-anycli first if it is not already installed."
+  omac_log_warn "Target config directory does not exist; creating it."
+  omac_log_warn "Install opencode-anycli first if it is not already installed."
   mkdir -p "$TARGET_DIR"
 fi
 
-omc_log_info "install dir : $INSTALL_DIR"
-omc_log_info "target dir  : $TARGET_DIR"
-omc_log_info "version     : $(omc_version)"
+omac_log_info "install dir : $INSTALL_DIR"
+omac_log_info "target dir  : $TARGET_DIR"
+omac_log_info "version     : $(omac_version)"
 
 # Counters
 copied_skills=0;   skipped_skills=0
@@ -107,7 +107,7 @@ copied_plugins=0
 
 # Track artifacts we install so --prune can clean stale ones.
 manifest_dir="$TARGET_DIR/.oh-my-anycli"
-omc_ensure_dir "$manifest_dir"
+omac_ensure_dir "$manifest_dir"
 manifest_file="$manifest_dir/manifest.txt"
 new_manifest="$(mktemp)"
 trap 'rm -f "$new_manifest"' EXIT
@@ -124,7 +124,7 @@ install_one() {
   # would be a shell-injection vector. The bash 4.3 `local -n` namespace ref
   # would be safer but macOS ships bash 3.2 so we keep eval for portability.
   local src="$1" dst="$2" cv="$3" sv="$4"
-  if omc_copy_file "$src" "$dst" "$force"; then
+  if omac_copy_file "$src" "$dst" "$force"; then
     eval "$cv=\$(( \${$cv} + 1 ))"
   else
     eval "$sv=\$(( \${$sv} + 1 ))"
@@ -133,20 +133,20 @@ install_one() {
 }
 
 # 4. skills/
-omc_log_step "Installing skills"
+omac_log_step "Installing skills"
 if [ -d "$INSTALL_DIR/skills" ]; then
   for skill_dir in "$INSTALL_DIR/skills"/*/; do
     [ -d "$skill_dir" ] || continue
     name="$(basename "$skill_dir")"
     src="$skill_dir/SKILL.md"
-    [ -f "$src" ] || { omc_log_warn "Skill '$name' has no SKILL.md; skipping."; continue; }
+    [ -f "$src" ] || { omac_log_warn "Skill '$name' has no SKILL.md; skipping."; continue; }
     dst="$TARGET_DIR/skills/$name/SKILL.md"
     install_one "$src" "$dst" copied_skills skipped_skills
   done
 fi
 
 # 5. commands/
-omc_log_step "Installing commands"
+omac_log_step "Installing commands"
 if [ -d "$INSTALL_DIR/commands" ]; then
   for cmd in "$INSTALL_DIR/commands"/*.md; do
     [ -f "$cmd" ] || continue
@@ -157,15 +157,15 @@ if [ -d "$INSTALL_DIR/commands" ]; then
 fi
 
 # 6. agents/
-omc_log_step "Installing agents"
+omac_log_step "Installing agents"
 if [ -d "$INSTALL_DIR/agents" ]; then
   for agent in "$INSTALL_DIR/agents"/*.md; do
     [ -f "$agent" ] || continue
     name="$(basename "$agent")"
     # Enforce model: cline/default — see docs/agent-authoring.md.
-    agent_model="$(omc_frontmatter_get "$agent" model 2>/dev/null || true)"
+    agent_model="$(omac_frontmatter_get "$agent" model 2>/dev/null || true)"
     if [ "$agent_model" != "cline/default" ]; then
-      omc_log_warn "Rejected agents/$name: model='$agent_model' (required: cline/default)"
+      omac_log_warn "Rejected agents/$name: model='$agent_model' (required: cline/default)"
       continue
     fi
     dst="$TARGET_DIR/agents/$name"
@@ -174,7 +174,7 @@ if [ -d "$INSTALL_DIR/agents" ]; then
 fi
 
 # 7. plugins/<name>/
-omc_log_step "Installing plugins"
+omac_log_step "Installing plugins"
 if [ -d "$INSTALL_DIR/plugins" ]; then
   for plugin_dir in "$INSTALL_DIR/plugins"/*/; do
     [ -d "$plugin_dir" ] || continue
@@ -183,7 +183,7 @@ if [ -d "$INSTALL_DIR/plugins" ]; then
     case "$plugin_name" in
       examples|README*) continue ;;
     esac
-    [ -f "$plugin_dir/plugin.json" ] || { omc_log_warn "Plugin '$plugin_name' has no plugin.json; skipping."; continue; }
+    [ -f "$plugin_dir/plugin.json" ] || { omac_log_warn "Plugin '$plugin_name' has no plugin.json; skipping."; continue; }
     copied_plugins=$(( copied_plugins + 1 ))
 
     if [ -d "$plugin_dir/skills" ]; then
@@ -211,13 +211,13 @@ if [ -d "$INSTALL_DIR/plugins" ]; then
         # Enforce model: cline/default — see docs/agent-authoring.md.
         # Sub-agents declaring any other model would fail at runtime because
         # this integration exposes only cline/default.
-        agent_model="$(omc_frontmatter_get "$agent" model 2>/dev/null || true)"
+        agent_model="$(omac_frontmatter_get "$agent" model 2>/dev/null || true)"
         if [ -n "$agent_model" ] && [ "$agent_model" != "cline/default" ]; then
-          omc_log_warn "Rejected $plugin_name/agents/$aname.md: model='$agent_model' (required: cline/default)"
+          omac_log_warn "Rejected $plugin_name/agents/$aname.md: model='$agent_model' (required: cline/default)"
           continue
         fi
         if [ -z "$agent_model" ]; then
-          omc_log_warn "Rejected $plugin_name/agents/$aname.md: missing required model key"
+          omac_log_warn "Rejected $plugin_name/agents/$aname.md: missing required model key"
           continue
         fi
         dst="$TARGET_DIR/agents/${plugin_name}__${aname}.md"
@@ -230,39 +230,39 @@ fi
 # Also process examples/ as a sanity-installable plugin set if a flag is set.
 # (Intentionally skipped by default to avoid clutter.)
 
-# 8. omc symlink.
+# 8. omac symlink.
 maybe_symlink_omc() {
   local target_bin
   case "$symlink_mode" in
     none) return 0 ;;
-    user) target_bin="$HOME/.local/bin/omc" ;;
-    system) target_bin="/usr/local/bin/omc" ;;
+    user) target_bin="$HOME/.local/bin/omac" ;;
+    system) target_bin="/usr/local/bin/omac" ;;
     auto)
-      if [ -w "/usr/local/bin" ]; then target_bin="/usr/local/bin/omc"
-      else                              target_bin="$HOME/.local/bin/omc"
+      if [ -w "/usr/local/bin" ]; then target_bin="/usr/local/bin/omac"
+      else                              target_bin="$HOME/.local/bin/omac"
       fi
       ;;
   esac
-  omc_ensure_dir "$(dirname "$target_bin")"
-  local src="$INSTALL_DIR/omc"
+  omac_ensure_dir "$(dirname "$target_bin")"
+  local src="$INSTALL_DIR/omac"
   if [ "$symlink_mode" = "system" ] && [ ! -w "$(dirname "$target_bin")" ]; then
-    omc_log_info "Creating system symlink with sudo"
+    omac_log_info "Creating system symlink with sudo"
     sudo ln -sf "$src" "$target_bin"
   else
     ln -sf "$src" "$target_bin"
   fi
-  omc_log_ok "linked $target_bin -> $src"
+  omac_log_ok "linked $target_bin -> $src"
 }
-maybe_symlink_omc || omc_log_warn "Failed to create omc symlink. Add $INSTALL_DIR to PATH."
+maybe_symlink_omc || omac_log_warn "Failed to create omac symlink. Add $INSTALL_DIR to PATH."
 
 # 9. --prune: remove anything in old manifest but not in new.
 if [ "$prune" = "1" ] && [ -f "$manifest_file" ]; then
-  omc_log_step "Pruning stale installed artifacts"
+  omac_log_step "Pruning stale installed artifacts"
   while IFS= read -r old; do
     if ! grep -Fxq "$old" "$new_manifest"; then
       if [ -f "$old" ]; then
         rm -f "$old"
-        omc_log_debug "pruned $old"
+        omac_log_debug "pruned $old"
         # Try to clean now-empty parent dir (skill dirs).
         rmdir "$(dirname "$old")" 2>/dev/null || true
       fi
@@ -274,7 +274,7 @@ mv "$new_manifest" "$manifest_file"
 trap - EXIT
 
 # 9. Summary.
-omc_log_ok "$(printf "installed: %d skills (%d skipped), %d commands (%d skipped), %d agents (%d skipped), %d plugins" \
+omac_log_ok "$(printf "installed: %d skills (%d skipped), %d commands (%d skipped), %d agents (%d skipped), %d plugins" \
   "$copied_skills" "$skipped_skills" \
   "$copied_commands" "$skipped_commands" \
   "$copied_agents" "$skipped_agents" \
@@ -283,7 +283,7 @@ omc_log_ok "$(printf "installed: %d skills (%d skipped), %d commands (%d skipped
 cat <<'EOF'
 
 Next steps:
-  1. omc doctor       - check installation status
-  2. omc list         - list installed artifacts
+  1. omac doctor       - check installation status
+  2. omac list         - list installed artifacts
   3. Start cline or opencode-anycli, then use slash commands such as /review or /test
 EOF

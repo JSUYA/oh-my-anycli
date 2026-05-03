@@ -37,7 +37,7 @@ REQUIRED_MODEL="cline/default"
 target_dir="${1:-$ROOT_DIR/agents}"
 
 if [ ! -d "$target_dir" ]; then
-  omc_die "agents directory not found: $target_dir"
+  omac_die "agents directory not found: $target_dir"
 fi
 
 failures=0
@@ -48,25 +48,25 @@ while IFS= read -r -d '' agent; do
   rel="${agent#"$ROOT_DIR/"}"
 
   # 1. required frontmatter keys
-  if ! omc_frontmatter_require "$agent" name description model >/dev/null 2>&1; then
-    omc_log_check fail "$rel - missing required frontmatter: name, description, model"
+  if ! omac_frontmatter_require "$agent" name description model >/dev/null 2>&1; then
+    omac_log_check fail "$rel - missing required frontmatter: name, description, model"
     failures=$(( failures + 1 ))
     continue
   fi
 
   # 2. name must match filename
   expected="$(basename "$agent" .md)"
-  actual_name="$(omc_frontmatter_get "$agent" name)"
+  actual_name="$(omac_frontmatter_get "$agent" name)"
   if [ "$expected" != "$actual_name" ]; then
-    omc_log_check fail "$rel - name='$actual_name' does not match filename '$expected'"
+    omac_log_check fail "$rel - name='$actual_name' does not match filename '$expected'"
     failures=$(( failures + 1 ))
     continue
   fi
 
   # 3. model must be cline/default — see header comment for rationale
-  actual_model="$(omc_frontmatter_get "$agent" model)"
+  actual_model="$(omac_frontmatter_get "$agent" model)"
   if [ "$actual_model" != "$REQUIRED_MODEL" ]; then
-    omc_log_check fail "$rel - model='$actual_model' (required: '$REQUIRED_MODEL')"
+    omac_log_check fail "$rel - model='$actual_model' (required: '$REQUIRED_MODEL')"
     failures=$(( failures + 1 ))
     continue
   fi
@@ -90,7 +90,7 @@ while IFS= read -r -d '' agent; do
     END { print bad+0 }
   ' "$agent")"
   if [ "$tools_violation" = "1" ]; then
-    omc_log_check fail "$rel - tools must use object form, not array or inline value"
+    omac_log_check fail "$rel - tools must use object form, not array or inline value"
     failures=$(( failures + 1 ))
     continue
   fi
@@ -104,24 +104,24 @@ while IFS= read -r -d '' agent; do
     END { print count+0 }
   ' "$agent")
   if [ "$body_lines" -lt 5 ]; then
-    omc_log_check fail "$rel - body is too short"
+    omac_log_check fail "$rel - body is too short"
     failures=$(( failures + 1 ))
     continue
   fi
 
-  omc_log_check ok "$rel"
+  omac_log_check ok "$rel"
 done < <(find "$target_dir" -type f -name '*.md' -print0)
 
 printf "\n"
 if [ "$checked" -eq 0 ]; then
-  omc_log_warn "no agent markdown files found: $target_dir"
+  omac_log_warn "no agent markdown files found: $target_dir"
   exit 0
 fi
 
 if [ "$failures" -gt 0 ]; then
-  omc_log_error "$failures / $checked agents failed lint"
+  omac_log_error "$failures / $checked agents failed lint"
   printf "\nAgents must use model: %s\n" "$REQUIRED_MODEL"
   exit 1
 fi
 
-omc_log_ok "$checked agents passed lint"
+omac_log_ok "$checked agents passed lint"

@@ -22,7 +22,7 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 target_dir="${1:-$ROOT_DIR/skills}"
 
 if [ ! -d "$target_dir" ]; then
-  omc_die "skills directory not found: $target_dir"
+  omac_die "skills directory not found: $target_dir"
 fi
 
 failures=0
@@ -31,17 +31,17 @@ checked=0
 while IFS= read -r -d '' skill; do
   checked=$(( checked + 1 ))
   rel="${skill#"$ROOT_DIR/"}"
-  if ! omc_frontmatter_require "$skill" name description >/dev/null 2>&1; then
-    omc_log_check fail "$rel - missing required frontmatter: name and description"
+  if ! omac_frontmatter_require "$skill" name description >/dev/null 2>&1; then
+    omac_log_check fail "$rel - missing required frontmatter: name and description"
     failures=$(( failures + 1 ))
     continue
   fi
 
   # Verify name == directory name.
   expected="$(basename "$(dirname "$skill")")"
-  actual="$(omc_frontmatter_get "$skill" name)"
+  actual="$(omac_frontmatter_get "$skill" name)"
   if [ "$expected" != "$actual" ]; then
-    omc_log_check fail "$rel - name='$actual' does not match directory '$expected'"
+    omac_log_check fail "$rel - name='$actual' does not match directory '$expected'"
     failures=$(( failures + 1 ))
     continue
   fi
@@ -55,23 +55,23 @@ while IFS= read -r -d '' skill; do
     END { print count+0 }
   ' "$skill")
   if [ "$body_lines" -lt 5 ]; then
-    omc_log_check fail "$rel - body is too short"
+    omac_log_check fail "$rel - body is too short"
     failures=$(( failures + 1 ))
     continue
   fi
 
-  omc_log_check ok "$rel"
+  omac_log_check ok "$rel"
 done < <(find "$target_dir" -type f -name SKILL.md -print0)
 
 printf "\n"
 if [ "$checked" -eq 0 ]; then
-  omc_log_warn "no SKILL.md files found: $target_dir"
+  omac_log_warn "no SKILL.md files found: $target_dir"
   exit 0
 fi
 
 if [ "$failures" -gt 0 ]; then
-  omc_log_error "$failures / $checked skills failed lint"
+  omac_log_error "$failures / $checked skills failed lint"
   exit 1
 fi
 
-omc_log_ok "$checked skills passed lint"
+omac_log_ok "$checked skills passed lint"

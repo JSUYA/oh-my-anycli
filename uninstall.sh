@@ -8,7 +8,7 @@
 # same target directory are safe.
 #
 # What this removes:
-#   1. The `omc` symlink in /usr/local/bin or ~/.local/bin
+#   1. The `omac` symlink in /usr/local/bin or ~/.local/bin
 #   2. Every file listed in the manifest (skills/commands/agents that
 #      install.sh copied)
 #   3. The manifest file itself
@@ -34,7 +34,7 @@
 #   ./uninstall.sh -h | --help           # this help
 #
 # Environment:
-#   OMC_TARGET_DIR   override the opencode-anycli config dir we clean from
+#   OMAC_TARGET_DIR   override the opencode-anycli config dir we clean from
 #
 set -euo pipefail
 
@@ -61,31 +61,31 @@ while [ $# -gt 0 ]; do
     --yes|-y)             assume_yes=1 ;;
     -h|--help)
       sed -n '3,37p' "$0"; exit 0 ;;
-    *) omc_die "unknown flag: $1" ;;
+    *) omac_die "unknown flag: $1" ;;
   esac
   shift
 done
 
-INSTALL_DIR="${OMC_INSTALL_DIR:-$SCRIPT_DIR}"
-TARGET_DIR="$(omc_target_dir)"
+INSTALL_DIR="${OMAC_INSTALL_DIR:-$SCRIPT_DIR}"
+TARGET_DIR="$(omac_target_dir)"
 
 confirm() {
   if [ "$assume_yes" = "1" ]; then return 0; fi
-  printf "${OMC_COLOR_YELLOW:-}?${OMC_COLOR_RESET:-} %s [y/N] " "$1"
+  printf "${OMAC_COLOR_YELLOW:-}?${OMAC_COLOR_RESET:-} %s [y/N] " "$1"
   read -r reply
   case "$reply" in y|Y|yes|YES) return 0 ;; *) return 1 ;; esac
 }
 
-# ─── 1. Remove omc symlink ────────────────────────────────────────────────────
+# ─── 1. Remove omac symlink ────────────────────────────────────────────────────
 if [ "$scope" = "none" ]; then
-  omc_log_step "Skipping omc symlink removal (--no-symlink)"
+  omac_log_step "Skipping omac symlink removal (--no-symlink)"
   targets=("__SKIP__")
 else
-  omc_log_step "Removing omc symlink"
+  omac_log_step "Removing omac symlink"
   case "$scope" in
-    user)   targets=("$HOME/.local/bin/omc") ;;
-    system) targets=("/usr/local/bin/omc") ;;
-    auto)   targets=("/usr/local/bin/omc" "$HOME/.local/bin/omc") ;;
+    user)   targets=("$HOME/.local/bin/omac") ;;
+    system) targets=("/usr/local/bin/omac") ;;
+    auto)   targets=("/usr/local/bin/omac" "$HOME/.local/bin/omac") ;;
   esac
 fi
 for t in "${targets[@]}"; do
@@ -93,29 +93,29 @@ for t in "${targets[@]}"; do
   if [ -L "$t" ]; then
     if [ -w "$(dirname "$t")" ]; then
       rm "$t"
-      omc_log_ok "removed symlink $t"
+      omac_log_ok "removed symlink $t"
     elif [ "$use_sudo" = "1" ]; then
       sudo rm "$t"
-      omc_log_ok "removed symlink $t (sudo)"
+      omac_log_ok "removed symlink $t (sudo)"
     else
-      omc_log_warn "no write permission for $(dirname "$t"). Re-run with --sudo to remove $t."
+      omac_log_warn "no write permission for $(dirname "$t"). Re-run with --sudo to remove $t."
     fi
   elif [ -e "$t" ]; then
-    omc_log_warn "$t exists but is not a symlink — leaving it alone."
+    omac_log_warn "$t exists but is not a symlink — leaving it alone."
   else
-    omc_log_info "no symlink at $t (already removed)"
+    omac_log_info "no symlink at $t (already removed)"
   fi
 done
 
 # ─── 2. Read manifest and remove our files ────────────────────────────────────
 manifest="$TARGET_DIR/.oh-my-anycli/manifest.txt"
-omc_log_step "Removing files listed in the install manifest"
-omc_log_info "target dir : $TARGET_DIR"
-omc_log_info "manifest   : $manifest"
+omac_log_step "Removing files listed in the install manifest"
+omac_log_info "target dir : $TARGET_DIR"
+omac_log_info "manifest   : $manifest"
 
 if [ ! -f "$manifest" ]; then
-  omc_log_warn "manifest not found — nothing to remove from $TARGET_DIR."
-  omc_log_warn "  (Already uninstalled, or OMC_TARGET_DIR differs from the install.sh run.)"
+  omac_log_warn "manifest not found — nothing to remove from $TARGET_DIR."
+  omac_log_warn "  (Already uninstalled, or OMAC_TARGET_DIR differs from the install.sh run.)"
 else
   removed=0
   missing=0
@@ -129,7 +129,7 @@ else
     fi
   done < "$manifest"
 
-  omc_log_ok "removed $removed file(s)$([ "$missing" -gt 0 ] && printf ", %d already missing" "$missing")"
+  omac_log_ok "removed $removed file(s)$([ "$missing" -gt 0 ] && printf ", %d already missing" "$missing")"
 
   # Clean up empty skill subdirectories (skills/<name>/ where SKILL.md was the only file).
   if [ -d "$TARGET_DIR/skills" ]; then
@@ -150,35 +150,35 @@ else
     d="$TARGET_DIR/$sub"
     if [ -d "$d" ] && [ -z "$(ls -A "$d" 2>/dev/null)" ]; then
       rmdir "$d"
-      omc_log_ok "removed empty $d"
+      omac_log_ok "removed empty $d"
     elif [ -d "$d" ]; then
-      omc_log_info "kept $d (still contains files not from oh-my-anycli)"
+      omac_log_info "kept $d (still contains files not from oh-my-anycli)"
     fi
   done
 fi
 
 # ─── 3. Optionally remove the install dir itself ──────────────────────────────
 if [ "$remove_install_dir" = "1" ]; then
-  omc_log_step "Removing install directory $INSTALL_DIR"
+  omac_log_step "Removing install directory $INSTALL_DIR"
   if [ -d "$INSTALL_DIR" ]; then
     if confirm "Delete $INSTALL_DIR, including this script and the git checkout?"; then
       # Delete from outside the directory to avoid `rm` operating on its own cwd.
       ( cd / && rm -rf "$INSTALL_DIR" )
-      omc_log_ok "removed $INSTALL_DIR"
+      omac_log_ok "removed $INSTALL_DIR"
     else
-      omc_log_info "skipped (user declined)"
+      omac_log_info "skipped (user declined)"
     fi
   else
-    omc_log_info "no install dir at $INSTALL_DIR (already removed)"
+    omac_log_info "no install dir at $INSTALL_DIR (already removed)"
   fi
 fi
 
 # ─── 4. Final advice ──────────────────────────────────────────────────────────
-printf "\n%boh-my-anycli uninstall complete.%b\n\n" "${OMC_COLOR_GREEN:-}" "${OMC_COLOR_RESET:-}"
+printf "\n%boh-my-anycli uninstall complete.%b\n\n" "${OMAC_COLOR_GREEN:-}" "${OMAC_COLOR_RESET:-}"
 printf "Left intact:\n"
 printf "  - opencode-anycli itself (use its separate uninstaller)\n"
 printf "  - %s/opencode.json (wrapper config)\n" "$TARGET_DIR"
 printf "  - commands/agents/skills files you added yourself\n"
 if [ "$remove_install_dir" = "0" ]; then
-  printf "  - %s ${OMC_COLOR_DIM:-}(remove with --remove-install-dir)${OMC_COLOR_RESET:-}\n" "$INSTALL_DIR"
+  printf "  - %s ${OMAC_COLOR_DIM:-}(remove with --remove-install-dir)${OMAC_COLOR_RESET:-}\n" "$INSTALL_DIR"
 fi

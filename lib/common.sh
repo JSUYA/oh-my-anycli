@@ -1,12 +1,12 @@
 # shellcheck shell=bash
-# Common helpers for oh-my-anycli install/update/omc/doctor scripts.
+# Common helpers for oh-my-anycli install/update/omac/doctor scripts.
 # Source after lib/colors.sh and lib/log.sh.
 
 # Resolve the install directory of oh-my-anycli itself.
-# Honors OMC_INSTALL_DIR; otherwise inferred from this file's location.
-omc_install_dir() {
-  if [ -n "${OMC_INSTALL_DIR:-}" ]; then
-    printf "%s" "$OMC_INSTALL_DIR"
+# Honors OMAC_INSTALL_DIR; otherwise inferred from this file's location.
+omac_install_dir() {
+  if [ -n "${OMAC_INSTALL_DIR:-}" ]; then
+    printf "%s" "$OMAC_INSTALL_DIR"
     return
   fi
   # lib/common.sh -> install dir is parent of lib/
@@ -20,14 +20,14 @@ omc_install_dir() {
 # (XDG_CONFIG_HOME=$HOME/.config/opencode-anycli → opencode reads
 # $HOME/.config/opencode-anycli/opencode/{commands,agents,skills}). The
 # wrapper installs opencode.json one level deeper for the same reason.
-omc_target_dir() {
-  printf "%s" "${OMC_TARGET_DIR:-$HOME/.config/opencode-anycli/opencode}"
+omac_target_dir() {
+  printf "%s" "${OMAC_TARGET_DIR:-$HOME/.config/opencode-anycli/opencode}"
 }
 
 # Read VERSION file, fallback to "unknown".
-omc_version() {
+omac_version() {
   local install_dir
-  install_dir="$(omc_install_dir)"
+  install_dir="$(omac_install_dir)"
   if [ -f "$install_dir/VERSION" ]; then
     tr -d '[:space:]' < "$install_dir/VERSION"
   else
@@ -36,34 +36,34 @@ omc_version() {
 }
 
 # Ensure a directory exists.
-omc_ensure_dir() {
+omac_ensure_dir() {
   local d="$1"
   if [ ! -d "$d" ]; then
     mkdir -p "$d"
-    omc_log_debug "created $d"
+    omac_log_debug "created $d"
   fi
 }
 
 # Copy a file with idempotency. Args: src dst [--force]
 # Returns 0 on copy, 1 on skip-existing, 2 on error.
-omc_copy_file() {
+omac_copy_file() {
   local src="$1" dst="$2" force="${3:-}"
   if [ ! -f "$src" ]; then
-    omc_log_error "source file missing: $src"
+    omac_log_error "source file missing: $src"
     return 2
   fi
-  omc_ensure_dir "$(dirname "$dst")"
+  omac_ensure_dir "$(dirname "$dst")"
   if [ -f "$dst" ] && [ "$force" != "--force" ]; then
     # If contents are identical, treat as no-op rather than skip.
     if cmp -s "$src" "$dst"; then
-      omc_log_debug "unchanged $dst"
+      omac_log_debug "unchanged $dst"
       return 0
     fi
-    omc_log_debug "skip existing $dst (use --force to overwrite)"
+    omac_log_debug "skip existing $dst (use --force to overwrite)"
     return 1
   fi
   cp "$src" "$dst"
-  omc_log_debug "wrote $dst"
+  omac_log_debug "wrote $dst"
   return 0
 }
 
@@ -71,8 +71,8 @@ omc_copy_file() {
 # matching closing '---', parses simple "key: value" lines (no nesting, no
 # multiline values). Prints "key=value" pairs, one per line.
 #
-# Usage: omc_parse_frontmatter <file>
-omc_parse_frontmatter() {
+# Usage: omac_parse_frontmatter <file>
+omac_parse_frontmatter() {
   local file="$1"
   awk '
     BEGIN { in_fm = 0; opened = 0 }
@@ -101,20 +101,20 @@ omc_parse_frontmatter() {
 }
 
 # Get a single frontmatter value. Args: file key
-omc_frontmatter_get() {
+omac_frontmatter_get() {
   local file="$1" key="$2"
-  omc_parse_frontmatter "$file" | awk -F= -v k="$key" '$1 == k { sub(/^[^=]*=/, ""); print; exit }'
+  omac_parse_frontmatter "$file" | awk -F= -v k="$key" '$1 == k { sub(/^[^=]*=/, ""); print; exit }'
 }
 
 # Validate that a frontmatter block contains all listed required keys.
 # Args: file key1 key2 ...
 # Returns 0 if all present, 1 with stderr message otherwise.
-omc_frontmatter_require() {
+omac_frontmatter_require() {
   local file="$1"; shift
   local missing=()
   local key
   for key in "$@"; do
-    if [ -z "$(omc_frontmatter_get "$file" "$key")" ]; then
+    if [ -z "$(omac_frontmatter_get "$file" "$key")" ]; then
       missing+=("$key")
     fi
   done
@@ -126,20 +126,20 @@ omc_frontmatter_require() {
 }
 
 # Slugify a string for filesystem use. Lowercases and replaces non-alnum with -.
-omc_slug() {
+omac_slug() {
   printf "%s" "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g'
 }
 
 # Infer plugin name from a git URL (last path segment, sans .git).
-omc_plugin_name_from_url() {
+omac_plugin_name_from_url() {
   local url="$1" name
   name="${url##*/}"
   name="${name%.git}"
-  printf "%s" "$(omc_slug "$name")"
+  printf "%s" "$(omac_slug "$name")"
 }
 
 # Count files matching a pattern under a directory. Args: dir pattern
-omc_count() {
+omac_count() {
   local dir="$1" pattern="$2"
   if [ ! -d "$dir" ]; then
     printf "0"

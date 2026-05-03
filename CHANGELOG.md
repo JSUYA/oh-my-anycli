@@ -29,7 +29,7 @@ cd ~/.oh-my-anycli && git pull
 # Changelog
 # Changelog
 # Changelog
-omc reapply
+omac reapply
 ```
 
 This section documents the changelog workflow.
@@ -54,7 +54,7 @@ This section documents the changelog workflow.
 This section documents the changelog workflow.
 `/daily`).
 
-### Added — `omc` CLI
+### Added — `omac` CLI
 
 - Keep the workflow scoped, explicit, and written in English.
 - Keep the workflow scoped, explicit, and written in English.
@@ -79,7 +79,7 @@ This section documents the changelog workflow.
 
 `security-auditor`, `debugger`, `doc-explainer`.
 
-### Added — `omc` CLI
+### Added — `omac` CLI
 
 This section documents the changelog workflow.
 This section documents the changelog workflow.
@@ -98,9 +98,9 @@ This section documents the changelog workflow.
 - Keep the workflow scoped, explicit, and written in English.
   `dependency-audit`, `git-commit-helper`.
 - 6 slash commands: `/review`, `/test`, `/refactor`, `/audit-deps`, `/commit`,
-  `/omc-status`.
+  `/omac-status`.
 - 3 sub-agents: `code-reviewer`, `test-writer`, `doc-writer`.
-- `omc` bash CLI: `help`, `version`, `list`, `skill list`, `command list`,
+- `omac` bash CLI: `help`, `version`, `list`, `skill list`, `command list`,
   `agent list`, `plugin list/add/remove`, `update`, `reapply`, `doctor`.
 - Keep the workflow scoped, explicit, and written in English.
 - 8 docs (English): `installation`, `skill-authoring`, `command-authoring`,
