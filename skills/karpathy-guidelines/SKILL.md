@@ -11,9 +11,9 @@ required_tools: [read]
 # which is itself derived from Andrej Karpathy's public observations on LLM coding pitfalls.
 # Upstream: https://github.com/forrestchang/andrej-karpathy-skills
 # Upstream license: MIT (declared in the upstream SKILL.md frontmatter).
-# This adaptation: MIT (per oh-my-clinecli's project license).
+# This adaptation: MIT (per oh-my-anycli's project license).
 # Changes from upstream:
-#   - Wrapped in oh-my-clinecli's standard frontmatter shape
+#   - Wrapped in oh-my-anycli's standard frontmatter shape
 #   - Added "When to use" / "Inputs" / "Output format" / "Anti-patterns" sections to
 #     match the rest of this catalog
 #   - The four core sections (Think Before Coding / Simplicity First / Surgical

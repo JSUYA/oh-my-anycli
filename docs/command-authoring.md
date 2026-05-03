@@ -1,6 +1,6 @@
 # Command Authoring
 
-This document describes the command authoring workflow for oh-my-clinecli.
+This document describes the command authoring workflow for oh-my-anycli.
 
 ## Purpose
 

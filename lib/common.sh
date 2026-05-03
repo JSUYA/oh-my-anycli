@@ -1,8 +1,8 @@
 # shellcheck shell=bash
-# Common helpers for oh-my-clinecli install/update/omc/doctor scripts.
+# Common helpers for oh-my-anycli install/update/omc/doctor scripts.
 # Source after lib/colors.sh and lib/log.sh.
 
-# Resolve the install directory of oh-my-clinecli itself.
+# Resolve the install directory of oh-my-anycli itself.
 # Honors OMC_INSTALL_DIR; otherwise inferred from this file's location.
 omc_install_dir() {
   if [ -n "${OMC_INSTALL_DIR:-}" ]; then
@@ -15,13 +15,13 @@ omc_install_dir() {
   printf "%s" "$(cd "$self_dir/.." && pwd)"
 }
 
-# Resolve the openclineclicode config directory.
+# Resolve the opencode-anycli config directory.
 # This is the directory opencode itself reads under the wrapper's XDG isolation
-# (XDG_CONFIG_HOME=$HOME/.config/openclineclicode → opencode reads
-# $HOME/.config/openclineclicode/opencode/{commands,agents,skills}). The
+# (XDG_CONFIG_HOME=$HOME/.config/opencode-anycli → opencode reads
+# $HOME/.config/opencode-anycli/opencode/{commands,agents,skills}). The
 # wrapper installs opencode.json one level deeper for the same reason.
 omc_target_dir() {
-  printf "%s" "${OMC_TARGET_DIR:-$HOME/.config/openclineclicode/opencode}"
+  printf "%s" "${OMC_TARGET_DIR:-$HOME/.config/opencode-anycli/opencode}"
 }
 
 # Read VERSION file, fallback to "unknown".

@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# ANSI color helpers for oh-my-clinecli scripts.
+# ANSI color helpers for oh-my-anycli scripts.
 # Source this file; do not execute it directly.
 #
 # Disable colors entirely by setting NO_COLOR=1 in the environment, or when

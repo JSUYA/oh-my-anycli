@@ -1,6 +1,6 @@
 # Plugin Authoring
 
-This document describes the plugin authoring workflow for oh-my-clinecli.
+This document describes the plugin authoring workflow for oh-my-anycli.
 
 ## Purpose
 

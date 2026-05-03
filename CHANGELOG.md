@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to **oh-my-clinecli** are documented here.
+All notable changes to **oh-my-anycli** are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versioning follows [SemVer](https://semver.org/spec/v2.0.0.html).
 
@@ -25,7 +25,7 @@ versioning follows [SemVer](https://semver.org/spec/v2.0.0.html).
 This section documents the changelog workflow.
 
 ```bash
-cd ~/.oh-my-clinecli && git pull
+cd ~/.oh-my-anycli && git pull
 # Changelog
 # Changelog
 # Changelog

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # lint-agents.sh — verify every agent .md under agents/ (and optional plugin
-# subdirectories) conforms to the oh-my-clinecli agent contract:
+# subdirectories) conforms to the oh-my-anycli agent contract:
 #
 #   1. frontmatter contains `name`, `description`, `model`
 #   2. `name` matches the filename (without .md)
@@ -12,7 +12,7 @@
 #   5. body is non-empty
 #
 # WHY model must be `cline/default`:
-#   openclineclicode exposes subagents through cline/default. Other model ids
+#   opencode-anycli exposes subagents through cline/default. Other model ids
 #   do not match the local routing contract and fail at runtime with
 #   NoSuchModelError, so we reject them at install time instead.
 #

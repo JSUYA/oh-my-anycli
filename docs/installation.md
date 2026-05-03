@@ -1,6 +1,6 @@
 # Installation
 
-This document describes the installation workflow for oh-my-clinecli.
+This document describes the installation workflow for oh-my-anycli.
 
 ## Purpose
 

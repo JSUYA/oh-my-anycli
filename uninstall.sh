@@ -3,7 +3,7 @@
 # uninstall.sh — remove what install.sh placed on this machine.
 #
 # Strategy: manifest-based. install.sh tracks every file it copies into
-# `<target>/.oh-my-clinecli/manifest.txt`. We remove only those files,
+# `<target>/.oh-my-anycli/manifest.txt`. We remove only those files,
 # never anything else — so user-authored skills/commands/agents in the
 # same target directory are safe.
 #
@@ -19,8 +19,8 @@
 #   - Files in target/{commands,agents,skills}/ that are NOT in our manifest
 #     (someone else, or the user, put them there)
 #   - Plugins under <install_dir>/plugins/
-#   - The install_dir (~/.oh-my-clinecli) — pass --remove-install-dir to remove
-#   - The user's openclineclicode wrapper config (opencode.json)
+#   - The install_dir (~/.oh-my-anycli) — pass --remove-install-dir to remove
+#   - The user's opencode-anycli wrapper config (opencode.json)
 #
 # Usage:
 #   ./uninstall.sh                       # symlink + manifested files only
@@ -34,7 +34,7 @@
 #   ./uninstall.sh -h | --help           # this help
 #
 # Environment:
-#   OMC_TARGET_DIR   override the openclineclicode config dir we clean from
+#   OMC_TARGET_DIR   override the opencode-anycli config dir we clean from
 #
 set -euo pipefail
 
@@ -108,7 +108,7 @@ for t in "${targets[@]}"; do
 done
 
 # ─── 2. Read manifest and remove our files ────────────────────────────────────
-manifest="$TARGET_DIR/.oh-my-clinecli/manifest.txt"
+manifest="$TARGET_DIR/.oh-my-anycli/manifest.txt"
 omc_log_step "Removing files listed in the install manifest"
 omc_log_info "target dir : $TARGET_DIR"
 omc_log_info "manifest   : $manifest"
@@ -143,7 +143,7 @@ else
 
   # Remove now-empty manifest directory.
   rm -f "$manifest"
-  rmdir "$TARGET_DIR/.oh-my-clinecli" 2>/dev/null || true
+  rmdir "$TARGET_DIR/.oh-my-anycli" 2>/dev/null || true
 
   # Optionally remove now-empty top-level dirs (commands/, agents/, skills/) — only if empty.
   for sub in commands agents skills; do
@@ -152,7 +152,7 @@ else
       rmdir "$d"
       omc_log_ok "removed empty $d"
     elif [ -d "$d" ]; then
-      omc_log_info "kept $d (still contains files not from oh-my-clinecli)"
+      omc_log_info "kept $d (still contains files not from oh-my-anycli)"
     fi
   done
 fi
@@ -174,9 +174,9 @@ if [ "$remove_install_dir" = "1" ]; then
 fi
 
 # ─── 4. Final advice ──────────────────────────────────────────────────────────
-printf "\n%boh-my-clinecli uninstall complete.%b\n\n" "${OMC_COLOR_GREEN:-}" "${OMC_COLOR_RESET:-}"
+printf "\n%boh-my-anycli uninstall complete.%b\n\n" "${OMC_COLOR_GREEN:-}" "${OMC_COLOR_RESET:-}"
 printf "Left intact:\n"
-printf "  - openclineclicode itself (use its separate uninstaller)\n"
+printf "  - opencode-anycli itself (use its separate uninstaller)\n"
 printf "  - %s/opencode.json (wrapper config)\n" "$TARGET_DIR"
 printf "  - commands/agents/skills files you added yourself\n"
 if [ "$remove_install_dir" = "0" ]; then

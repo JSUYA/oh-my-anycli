@@ -1,6 +1,6 @@
 # Troubleshooting
 
-This document describes the troubleshooting workflow for oh-my-clinecli.
+This document describes the troubleshooting workflow for oh-my-anycli.
 
 ## Purpose
 

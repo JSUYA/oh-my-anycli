@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# doctor.sh — diagnose oh-my-clinecli installation.
+# doctor.sh — diagnose oh-my-anycli installation.
 #
 # Prints a colorized check report and exits 0 if everything is healthy,
 # 1 if any check fails.
@@ -21,13 +21,13 @@ TARGET_DIR="$(omc_target_dir)"
 failures=0
 fail() { failures=$(( failures + 1 )); }
 
-printf "\n%b\n" "$(omc_color_bold "oh-my-clinecli doctor")"
+printf "\n%b\n" "$(omc_color_bold "oh-my-anycli doctor")"
 printf "  install dir : %s\n" "$INSTALL_DIR"
 printf "  target dir  : %s\n" "$TARGET_DIR"
 printf "  version     : %s\n\n" "$(omc_version)"
 
-# 1. openclineclicode config dir present.
-printf "%b\n" "$(omc_color_bold "[1] openclineclicode config")"
+# 1. opencode-anycli config dir present.
+printf "%b\n" "$(omc_color_bold "[1] opencode-anycli config")"
 if [ -d "$TARGET_DIR" ]; then
   omc_log_check ok "target config directory exists"
 else

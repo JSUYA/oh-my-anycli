@@ -1,6 +1,6 @@
 # Agent Authoring
 
-This document describes the agent authoring workflow for oh-my-clinecli.
+This document describes the agent authoring workflow for oh-my-anycli.
 
 ## Purpose
 

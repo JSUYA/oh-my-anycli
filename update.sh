@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# update.sh — pull latest oh-my-clinecli and reapply.
+# update.sh — pull latest oh-my-anycli and reapply.
 #
 # Usage:
 #   ./update.sh             # git pull --ff-only && ./install.sh --reapply

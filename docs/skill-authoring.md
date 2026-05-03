@@ -1,6 +1,6 @@
 # Skill Authoring
 
-This document describes the skill authoring workflow for oh-my-clinecli.
+This document describes the skill authoring workflow for oh-my-anycli.
 
 ## Purpose
 

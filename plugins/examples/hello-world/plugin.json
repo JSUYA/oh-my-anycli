@@ -4,5 +4,5 @@
   "author": "Project Maintainers",
   "description": "Minimal example plugin demonstrating skills, commands, and agents.",
   "kind": "mixed",
-  "compat": { "oh-my-clinecli": ">=0.1.0" }
+  "compat": { "oh-my-anycli": ">=0.1.0" }
 }

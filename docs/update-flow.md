@@ -1,6 +1,6 @@
 # Update Flow
 
-This document describes the update flow workflow for oh-my-clinecli.
+This document describes the update flow workflow for oh-my-anycli.
 
 ## Purpose
 

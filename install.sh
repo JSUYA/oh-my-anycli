@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #
-# install.sh — bootstrap installer for oh-my-clinecli.
+# install.sh — bootstrap installer for oh-my-anycli.
 #
 # Copies skills/, commands/, agents/, and any plugins/ into the user's
-# openclineclicode config directory (~/.config/openclineclicode by default).
+# opencode-anycli config directory (~/.config/opencode-anycli by default).
 #
 # Usage:
 #   ./install.sh                # idempotent: skips files that already exist
@@ -15,8 +15,8 @@
 #   ./install.sh --no-symlink   # do not create the omc symlink at all
 #
 # Environment:
-#   OMC_INSTALL_DIR   override install location (default: ~/.oh-my-clinecli)
-#   OMC_TARGET_DIR    override openclineclicode config dir
+#   OMC_INSTALL_DIR   override install location (default: ~/.oh-my-anycli)
+#   OMC_TARGET_DIR    override opencode-anycli config dir
 #   OMC_REPO_URL      override the repo URL used by initial clone
 #
 set -euo pipefail
@@ -32,8 +32,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Repository URL used by the auto-clone path (only when the script is run
 # from outside an existing checkout AND OMC_INSTALL_DIR points at a
 # non-existent directory). In a team fork, override with:
-#   OMC_REPO_URL=https://git.example.com/<your-org>/oh-my-clinecli.git
-DEFAULT_REPO_URL="${OMC_REPO_URL:-https://github.com/JSUYA/oh-my-clinecli.git}"
+#   OMC_REPO_URL=https://git.example.com/<your-org>/oh-my-anycli.git
+DEFAULT_REPO_URL="${OMC_REPO_URL:-https://github.com/JSUYA/oh-my-anycli.git}"
 
 force=""
 prune=0
@@ -64,7 +64,7 @@ TARGET_DIR="$(omc_target_dir)"
 #      a) OMC_INSTALL_DIR env (if set AND points at an existing checkout)
 #      b) The script's own location, if it contains install.sh + lib/ (i.e. we're
 #         already running from a checkout — `git clone && ./install.sh` case)
-#      c) Default ~/.oh-my-clinecli; clone into it if absent
+#      c) Default ~/.oh-my-anycli; clone into it if absent
 #
 #    This keeps `git clone <repo> && cd <repo> && ./install.sh` working without
 #    requiring OMC_INSTALL_DIR, and also makes re-running from inside an
@@ -74,9 +74,9 @@ if [ -n "${OMC_INSTALL_DIR:-}" ] && [ -d "${OMC_INSTALL_DIR}" ]; then
 elif [ -f "$SCRIPT_DIR/install.sh" ] && [ -d "$SCRIPT_DIR/lib" ] && [ -d "$SCRIPT_DIR/skills" ]; then
   INSTALL_DIR="$SCRIPT_DIR"
 else
-  INSTALL_DIR="${OMC_INSTALL_DIR:-$HOME/.oh-my-clinecli}"
+  INSTALL_DIR="${OMC_INSTALL_DIR:-$HOME/.oh-my-anycli}"
   if [ ! -d "$INSTALL_DIR" ]; then
-    omc_log_step "Cloning oh-my-clinecli into $INSTALL_DIR"
+    omc_log_step "Cloning oh-my-anycli into $INSTALL_DIR"
     if ! command -v git >/dev/null 2>&1; then
       omc_die "git is not installed; install git and retry."
     fi
@@ -86,12 +86,12 @@ else
   fi
 fi
 
-# 2. Detect openclineclicode config dir. Auto-create if it doesn't exist —
-#    oh-my-clinecli only writes into subdirs (skills/command/agent), so creating
-#    the parent is harmless even before openclineclicode itself runs.
+# 2. Detect opencode-anycli config dir. Auto-create if it doesn't exist —
+#    oh-my-anycli only writes into subdirs (skills/command/agent), so creating
+#    the parent is harmless even before opencode-anycli itself runs.
 if [ ! -d "$TARGET_DIR" ]; then
   omc_log_warn "Target config directory does not exist; creating it."
-  omc_log_warn "Install openclineclicode first if it is not already installed."
+  omc_log_warn "Install opencode-anycli first if it is not already installed."
   mkdir -p "$TARGET_DIR"
 fi
 
@@ -106,7 +106,7 @@ copied_agents=0;   skipped_agents=0
 copied_plugins=0
 
 # Track artifacts we install so --prune can clean stale ones.
-manifest_dir="$TARGET_DIR/.oh-my-clinecli"
+manifest_dir="$TARGET_DIR/.oh-my-anycli"
 omc_ensure_dir "$manifest_dir"
 manifest_file="$manifest_dir/manifest.txt"
 new_manifest="$(mktemp)"
@@ -285,5 +285,5 @@ cat <<'EOF'
 Next steps:
   1. omc doctor       - check installation status
   2. omc list         - list installed artifacts
-  3. Start cline or openclineclicode, then use slash commands such as /review or /test
+  3. Start cline or opencode-anycli, then use slash commands such as /review or /test
 EOF

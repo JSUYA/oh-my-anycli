@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the architecture workflow for oh-my-clinecli.
+This document describes the architecture workflow for oh-my-anycli.
 
 ## Purpose
 

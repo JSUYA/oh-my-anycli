@@ -2,7 +2,7 @@
 #
 # verify-install.sh — smoke-test install.sh in an isolated tmpdir.
 #
-# Builds a fake openclineclicode config dir, points install.sh at it, and asserts
+# Builds a fake opencode-anycli config dir, points install.sh at it, and asserts
 # that the expected files appear. Pure bash, no real LLM or cline involved.
 #
 # Usage:
@@ -22,7 +22,7 @@ trap 'rm -rf "$tmpdir"' EXIT
 
 omc_log_step "tmpdir: $tmpdir"
 
-fake_target="$tmpdir/fake-config/openclineclicode"
+fake_target="$tmpdir/fake-config/opencode-anycli"
 mkdir -p "$fake_target"
 
 omc_log_step "running install.sh in isolated target"
@@ -71,7 +71,7 @@ OMC_TARGET_DIR="$fake_target" \
 "$ROOT_DIR/install.sh" --reapply --no-symlink >/dev/null
 
 # Manifest must have been written.
-if [ -s "$fake_target/.oh-my-clinecli/manifest.txt" ]; then
+if [ -s "$fake_target/.oh-my-anycli/manifest.txt" ]; then
   omc_log_check ok "manifest written"
 else
   omc_log_check fail "manifest missing or empty"

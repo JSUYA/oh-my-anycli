@@ -1,6 +1,6 @@
-# oh-my-clinecli
+# oh-my-anycli
 
-oh-my-clinecli adds reusable skills, slash commands, subagents, and plugins to openclineclicode.
+oh-my-anycli adds reusable skills, slash commands, subagents, and plugins to opencode-anycli.
 
 ## Inspirations & how this project deviates from them
 
@@ -22,7 +22,7 @@ copyrightable expression.
   Divoom Bluetooth, and browser interview servers are out of scope for this
   collection
 - **All sub-agents pinned to `model: cline/default`** — enforced by
-  `tests/lint-agents.sh` and `install.sh`, because openclineclicode exposes
+  `tests/lint-agents.sh` and `install.sh`, because opencode-anycli exposes
   exactly one model id
 - **Functional agent names** (`code-reviewer`, `dba`, `release-manager`)
   instead of literary character names — easier for new contributors to read
@@ -38,13 +38,13 @@ copyrightable expression.
 
 - 36 skills for review, testing, documentation, DevOps, database, API, security, language-specific coding workflows (C/C++, Rust, C#, Tizen), and behavioral guidelines (Karpathy guidelines).
 - 37 slash commands that route common tasks to those skills.
-- 10 subagents pinned to `model: cline/default` for openclineclicode compatibility.
+- 10 subagents pinned to `model: cline/default` for opencode-anycli compatibility.
 - A Bash `omc` helper for listing, searching, installing, updating, and diagnosing the collection.
 - A plugin slot for team- or project-specific extensions.
 
 ## Coding Advantages Over Plain cline CLI
 
-oh-my-clinecli does not change the model that cline uses. It improves coding outcomes by turning common development tasks into reusable workflows with explicit checks.
+oh-my-anycli does not change the model that cline uses. It improves coding outcomes by turning common development tasks into reusable workflows with explicit checks.
 
 - **Feature work becomes more disciplined.** Skills can steer the agent to read existing patterns first, make scoped changes, and report verification instead of producing an isolated patch.
 - **Runtime fixes become more evidence-based.** Debugging-oriented workflows encourage reproduction, stack-trace reading, dependency checks, ranked root-cause hypotheses, and minimal fixes.
@@ -53,28 +53,28 @@ oh-my-clinecli does not change the model that cline uses. It improves coding out
 - **Specialized domains get targeted criteria.** Security, database, Dockerfile, CI, release, API, and documentation tasks each get their own checklist instead of relying on a generic prompt.
 - **Project standards are reusable.** The same commands, skills, and subagents can be versioned, reviewed, installed, updated, and extended through plugins.
 
-Plain cline CLI is still the simpler choice for very small one-off edits. oh-my-clinecli pays off when implementation, debugging, review, and verification need to happen as one repeatable development loop.
+Plain cline CLI is still the simpler choice for very small one-off edits. oh-my-anycli pays off when implementation, debugging, review, and verification need to happen as one repeatable development loop.
 
 ## Install
 
 ```bash
-git clone https://github.com/JSUYA/oh-my-clinecli.git ~/.oh-my-clinecli
-~/.oh-my-clinecli/install.sh
+git clone https://github.com/JSUYA/oh-my-anycli.git ~/.oh-my-anycli
+~/.oh-my-anycli/install.sh
 omc doctor
 ```
 
-openclineclicode should be installed first so the target config directory exists.
+opencode-anycli should be installed first so the target config directory exists.
 
 ## Uninstall
 
 ```bash
-~/.oh-my-clinecli/uninstall.sh                       # remove omc symlink + manifested files
-~/.oh-my-clinecli/uninstall.sh --remove-install-dir  # also delete ~/.oh-my-clinecli itself
-~/.oh-my-clinecli/uninstall.sh --yes                 # skip confirmation prompts
+~/.oh-my-anycli/uninstall.sh                       # remove omc symlink + manifested files
+~/.oh-my-anycli/uninstall.sh --remove-install-dir  # also delete ~/.oh-my-anycli itself
+~/.oh-my-anycli/uninstall.sh --yes                 # skip confirmation prompts
 ```
 
 The uninstaller is **manifest-based**: it only removes files that `install.sh`
-recorded in `<target>/.oh-my-clinecli/manifest.txt`. Skills/commands/agents you
+recorded in `<target>/.oh-my-anycli/manifest.txt`. Skills/commands/agents you
 authored yourself in the same directory are left intact.
 
 ## Common Commands

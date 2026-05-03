@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# omc — oh-my-clinecli CLI.
+# omc — oh-my-anycli CLI.
 #
 # Pure bash, zero dependencies. Dispatched via a `case` statement.
 #
@@ -23,7 +23,7 @@ usage() {
   cmd_count="$(omc_count "$INSTALL_DIR/commands" '*.md')"
   agent_count="$(omc_count "$INSTALL_DIR/agents" '*.md')"
   cat <<EOF
-$(omc_color_bold "omc") — oh-my-clinecli CLI ($(omc_version))
+$(omc_color_bold "omc") — oh-my-anycli CLI ($(omc_version))
 
 Commands:
   omc list [-v]                  list installed artifacts
@@ -261,7 +261,7 @@ cmd_plugin_remove() {
 cmd_update()  { "$INSTALL_DIR/update.sh" "$@"; }
 cmd_reapply() { "$INSTALL_DIR/install.sh" --reapply; }
 cmd_doctor()  { "$INSTALL_DIR/doctor.sh"; }
-cmd_version() { printf "oh-my-clinecli %s\n" "$(omc_version)"; }
+cmd_version() { printf "oh-my-anycli %s\n" "$(omc_version)"; }
 
 main() {
   local sub="${1:-help}"

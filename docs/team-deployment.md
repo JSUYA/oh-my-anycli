@@ -1,6 +1,6 @@
 # Team Deployment
 
-This document describes the team deployment workflow for oh-my-clinecli.
+This document describes the team deployment workflow for oh-my-anycli.
 
 ## Purpose
 

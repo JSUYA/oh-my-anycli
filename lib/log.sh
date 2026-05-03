@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Logging helpers for oh-my-clinecli. Source after lib/colors.sh.
+# Logging helpers for oh-my-anycli. Source after lib/colors.sh.
 
 # Levels: info, warn, error, ok, step.
 # Verbosity: OMC_VERBOSE=1 enables debug output.

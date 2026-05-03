@@ -1,5 +1,5 @@
 ---
-description: Summarize the installed oh-my-clinecli status.
+description: Summarize the installed oh-my-anycli status.
 argument_hint: "[optional arguments]"
 allowed_tools: [bash]
 ---
