@@ -36,8 +36,8 @@ copyrightable expression.
 
 ## What It Provides
 
-- 38 skills for review, testing, documentation, DevOps, database, API, security, language-specific coding workflows (C/C++, Rust, C#, Tizen), and behavioral guidelines (Karpathy guidelines).
-- 39 slash commands that route common tasks to those skills.
+- 39 skills for review, testing, documentation, DevOps, database, API, security, sandboxed browser testing, language-specific coding workflows (C/C++, Rust, C#, Tizen), and behavioral guidelines (Karpathy guidelines).
+- 40 slash commands that route common tasks to those skills.
 - 12 subagents pinned to `model: cline/default` for opencode-anycli compatibility (10 original + 2 adapted from `alvinunreal/oh-my-opencode-slim` (MIT): `orchestrator`, `oracle`).
 - A Bash `omac` helper for listing, searching, installing, updating, and diagnosing the collection.
 - A plugin slot for team- or project-specific extensions.
