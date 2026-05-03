@@ -36,8 +36,8 @@ copyrightable expression.
 
 ## What It Provides
 
-- 37 skills for review, testing, documentation, DevOps, database, API, security, language-specific coding workflows (C/C++, Rust, C#, Tizen), and behavioral guidelines (Karpathy guidelines).
-- 38 slash commands that route common tasks to those skills.
+- 38 skills for review, testing, documentation, DevOps, database, API, security, language-specific coding workflows (C/C++, Rust, C#, Tizen), and behavioral guidelines (Karpathy guidelines).
+- 39 slash commands that route common tasks to those skills.
 - 12 subagents pinned to `model: cline/default` for opencode-anycli compatibility (10 original + 2 adapted from `alvinunreal/oh-my-opencode-slim` (MIT): `orchestrator`, `oracle`).
 - A Bash `omac` helper for listing, searching, installing, updating, and diagnosing the collection.
 - A plugin slot for team- or project-specific extensions.
@@ -103,6 +103,24 @@ config), use its own update command:
 
 ```bash
 opencode-anycli --update          # git pull + ./install.sh inside opencode-anycli's checkout
+```
+
+## Interactive Subprocesses (sudo, ssh-add, ...)
+
+opencode-anycli keeps the cline subprocess's stdin connected to your
+terminal by default, so prompts from `sudo`, `ssh-add`, `gh auth login`,
+etc. can read input. If a prompt still fails (because the inner bash
+tool doesn't forward stdin), use the `/sudo` slash command — it invokes
+the `sudo-helper` skill and walks you through three workarounds
+(passwordless sudo for specific commands, `SUDO_ASKPASS`, or
+pre-authorized sudo cache).
+
+To opt out (CI / piped input):
+
+```bash
+opencode-anycli --no-tty
+# or
+export OPENCODE_ANYCLI_TTY=0
 ```
 
 ## Auto-approve (Yolo Mode)
