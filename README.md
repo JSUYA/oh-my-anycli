@@ -85,8 +85,54 @@ authored yourself in the same directory are left intact.
 | `omac search <keyword>` | Search frontmatter metadata. |
 | `omac info <name>` | Show one artifact's frontmatter. |
 | `omac plugin add <git-url>` | Add an external plugin. |
-| `omac update` | Pull and reapply the collection. |
+| `omac update` | `git pull --ff-only` + reapply (mirrors `opencode-anycli --update`). |
 | `omac doctor` | Check installation status. |
+
+## Update
+
+To pull the latest skills/commands/agents from this repo and reapply them
+to your `~/.config/opencode-anycli/opencode/` directory:
+
+```bash
+omac update           # equivalent to: cd ~/.oh-my-anycli && git pull --ff-only && ./install.sh --reapply
+omac update --prune   # also remove artifacts that no longer exist upstream
+```
+
+To update the parent `opencode-anycli` wrapper (binary, provider, default
+config), use its own update command:
+
+```bash
+opencode-anycli --update          # git pull + ./install.sh inside opencode-anycli's checkout
+```
+
+## Auto-approve (Yolo Mode)
+
+opencode-anycli prompts for approval on file edits, bash commands, web
+fetches, and other gated tools. To silence those prompts for an unattended
+session, relaunch opencode-anycli with the auto-approve flag:
+
+```bash
+opencode-anycli --auto-approve     # also accepts --yolo, -y
+# or persistent:
+export OPENCODE_ANYCLI_AUTO_APPROVE=1
+```
+
+This is a **session-scoped** decision: opencode loads its permission
+config once at start and does not watch it for changes. There is no
+slash command or env var that flips auto-approve in the middle of a
+running session.
+
+The slash command `/auto-approve` (and the `auto-approve` skill it
+invokes) is provided **only to give that exact answer to the user** when
+they ask "how do I turn off these prompts?". It does not — and cannot —
+silently mutate the live session. See `skills/auto-approve/SKILL.md` for
+the full explanation, including the two-layer permission model
+(opencode outer vs cline inner) and the safety guidance.
+
+The cline subprocess that opencode-anycli spawns is already invoked with
+`--yolo` by the provider, so the inner cline layer never asked for
+approval to begin with — `--auto-approve` only affects the outer
+opencode layer.
 
 ## Documentation
 
