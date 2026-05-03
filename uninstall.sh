@@ -78,10 +78,10 @@ confirm() {
 
 # ─── 1. Remove omc symlink ────────────────────────────────────────────────────
 if [ "$scope" = "none" ]; then
-  omc_log_step "omc 심볼릭 링크 제거 / Skipping symlink removal (--no-symlink)"
+  omc_log_step "Skipping omc symlink removal (--no-symlink)"
   targets=("__SKIP__")
 else
-  omc_log_step "omc 심볼릭 링크 제거 / Removing omc symlink"
+  omc_log_step "Removing omc symlink"
   case "$scope" in
     user)   targets=("$HOME/.local/bin/omc") ;;
     system) targets=("/usr/local/bin/omc") ;;
@@ -109,13 +109,13 @@ done
 
 # ─── 2. Read manifest and remove our files ────────────────────────────────────
 manifest="$TARGET_DIR/.oh-my-clinecli/manifest.txt"
-omc_log_step "설치 매니페스트 기반 파일 제거 / Removing manifested files"
+omc_log_step "Removing files listed in the install manifest"
 omc_log_info "target dir : $TARGET_DIR"
 omc_log_info "manifest   : $manifest"
 
 if [ ! -f "$manifest" ]; then
   omc_log_warn "manifest not found — nothing to remove from $TARGET_DIR."
-  omc_log_warn "  (이미 uninstall 했거나, OMC_TARGET_DIR 가 install.sh 와 다릅니다.)"
+  omc_log_warn "  (Already uninstalled, or OMC_TARGET_DIR differs from the install.sh run.)"
 else
   removed=0
   missing=0
@@ -159,9 +159,9 @@ fi
 
 # ─── 3. Optionally remove the install dir itself ──────────────────────────────
 if [ "$remove_install_dir" = "1" ]; then
-  omc_log_step "설치 디렉터리 제거 / Removing $INSTALL_DIR"
+  omc_log_step "Removing install directory $INSTALL_DIR"
   if [ -d "$INSTALL_DIR" ]; then
-    if confirm "정말 $INSTALL_DIR 를 지울까요? (이 스크립트 자체와 git 저장소 포함)"; then
+    if confirm "Delete $INSTALL_DIR, including this script and the git checkout?"; then
       # Delete from outside the directory to avoid `rm` operating on its own cwd.
       ( cd / && rm -rf "$INSTALL_DIR" )
       omc_log_ok "removed $INSTALL_DIR"
@@ -175,10 +175,10 @@ fi
 
 # ─── 4. Final advice ──────────────────────────────────────────────────────────
 printf "\n%boh-my-clinecli uninstall complete.%b\n\n" "${OMC_COLOR_GREEN:-}" "${OMC_COLOR_RESET:-}"
-printf "건드리지 않은 것 / Left intact:\n"
-printf "  - openclineclicode 자체 (별도 uninstaller 사용)\n"
+printf "Left intact:\n"
+printf "  - openclineclicode itself (use its separate uninstaller)\n"
 printf "  - %s/opencode.json (wrapper config)\n" "$TARGET_DIR"
-printf "  - 사용자 본인이 추가한 commands/agents/skills 파일\n"
+printf "  - commands/agents/skills files you added yourself\n"
 if [ "$remove_install_dir" = "0" ]; then
-  printf "  - %s ${OMC_COLOR_DIM:-}(--remove-install-dir 로 제거 가능)${OMC_COLOR_RESET:-}\n" "$INSTALL_DIR"
+  printf "  - %s ${OMC_COLOR_DIM:-}(remove with --remove-install-dir)${OMC_COLOR_RESET:-}\n" "$INSTALL_DIR"
 fi

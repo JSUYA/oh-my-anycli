@@ -1,6 +1,6 @@
 ---
-description: 변경된 Rust 파일의 옛 패턴을 현재 관용구로 마이그레이션합니다 (try!→?, 수동 루프→이터레이터, 에러 핸들링 등).
-argument_hint: "[경로 또는 에러 패턴 (anyhow|thiserror|eyre|std)]"
+description: Modernize changed Rust files from older patterns to current idioms such as try! to ?, manual loops to iterators, and clearer error handling.
+argument_hint: "[path or error pattern (anyhow|thiserror|eyre|std)]"
 allowed_tools: [bash, read, edit]
 ---
 

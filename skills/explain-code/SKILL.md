@@ -1,6 +1,6 @@
 ---
 name: explain-code
-description: Explains a function, file, or module at the requested depth (summary, walkthrough, deep-dive). Korean explanation with English code identifiers preserved. Traces callers/callees via grep when feasible and lists related files.
+description: Explains a function, file, or module at the requested depth (summary, walkthrough, deep-dive). Preserves code identifiers exactly, traces callers/callees via grep when feasible, and lists related files.
 version: 1.0.0
 when_to_use: User asks "/explain", "what does this do?", "walk me through this file", or wants onboarding context on an unfamiliar module. Read-only — never modifies code.
 inputs:

@@ -1,6 +1,6 @@
 ---
 name: doc-explainer
-description: Specialist subagent for read-only code walks — explains a function, file, or module at the requested depth. Korean prose, English identifiers, no edits.
+description: Specialist subagent for read-only code walks — explains a function, file, or module at the requested depth. Preserves code identifiers exactly and makes no edits.
 mode: subagent
 model: cline/default
 tools:

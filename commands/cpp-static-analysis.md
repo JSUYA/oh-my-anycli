@@ -1,6 +1,6 @@
 ---
-description: clang-tidy 또는 cppcheck로 변경된 C/C++ 파일만 정적 분석하고 결과를 분류합니다.
-argument_hint: "[대상 경로 또는 체크 셋]"
+description: Run clang-tidy or cppcheck on changed C/C++ files only and categorize the results.
+argument_hint: "[target path or check set]"
 allowed_tools: [bash, read, edit]
 ---
 

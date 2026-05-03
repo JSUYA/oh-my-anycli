@@ -1,6 +1,6 @@
 ---
 name: pr-description-writer
-description: Generates a PR description from commits-since-base and diff statistics. Sections cover Summary, Why, What changed, Testing notes, and Risk. Korean primary, English headings allowed. Honors any project PR template if found; otherwise emits a clean neutral structure.
+description: Generates a PR description from commits-since-base and diff statistics. Sections cover Summary, Why, What changed, Testing notes, and Risk. Honors any project PR template if found; otherwise emits a clean neutral structure.
 version: 1.0.0
 when_to_use: User asks "/pr-desc", "write the PR description", or "summarize this branch for review". Run after commits land on the branch and before opening the PR.
 inputs:

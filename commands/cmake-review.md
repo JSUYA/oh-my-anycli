@@ -1,6 +1,6 @@
 ---
-description: CMakeLists.txt를 모던 CMake 관행 기준으로 점검하고 우선순위가 매겨진 발견 사항을 보고합니다.
-argument_hint: "[CMakeLists.txt 경로 또는 디렉터리]"
+description: Review CMakeLists.txt against modern CMake practices and report prioritized findings.
+argument_hint: "[CMakeLists.txt path or directory]"
 allowed_tools: [bash, read]
 ---
 

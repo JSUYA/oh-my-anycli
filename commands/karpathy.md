@@ -1,6 +1,6 @@
 ---
-description: Karpathy의 LLM 코딩 가이드라인을 현재 작업에 적용합니다 (생각→단순화→외과적 수정→검증 가능 목표).
-argument_hint: "(인자 없음 — 전체 가이드라인 적용)"
+description: Apply Karpathy-inspired LLM coding guidelines to the current task: think first, simplify, make surgical edits, and define verifiable goals.
+argument_hint: "(no arguments; apply the full guideline set)"
 allowed_tools: [read]
 ---
 

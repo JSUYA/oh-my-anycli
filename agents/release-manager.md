@@ -1,6 +1,6 @@
 ---
 name: release-manager
-description: Specialist subagent for releases and weekly cadence — branch prep, PR descriptions, weekly reports as release-note seeds. Korean release notes; safety gates; never force-pushes.
+description: Specialist subagent for releases and weekly cadence — branch prep, PR descriptions, weekly reports as release-note seeds. Uses safety gates and never force-pushes.
 mode: subagent
 model: cline/default
 tools:

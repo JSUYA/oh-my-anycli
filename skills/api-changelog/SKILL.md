@@ -1,6 +1,6 @@
 ---
 name: api-changelog
-description: Compares two OpenAPI / GraphQL spec files (or two git revisions of the same spec) and produces a structured breaking-change report — removed endpoints, changed parameter types, removed enum values, response shape changes. Categorized as BREAKING / NON-BREAKING / ADDITIVE. Korean summary.
+description: Compares two OpenAPI / GraphQL spec files (or two git revisions of the same spec) and produces a structured breaking-change report covering removed endpoints, changed parameter types, removed enum values, and response shape changes. Categorized as BREAKING / NON-BREAKING / ADDITIVE.
 version: 1.0.0
 when_to_use: User asks "/api-diff", "what changed in this spec", or before publishing a new API version. Useful for downstream client teams who need a heads-up on breaking changes.
 inputs:

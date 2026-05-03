@@ -1,6 +1,6 @@
 ---
-description: 변경된 Rust 파일의 unsafe 블록을 안전성 체크리스트로 감사하고 분류합니다.
-argument_hint: "[경로]"
+description: Audit unsafe blocks in changed Rust files with a safety checklist and categorized findings.
+argument_hint: "[path]"
 allowed_tools: [bash, read]
 ---
 

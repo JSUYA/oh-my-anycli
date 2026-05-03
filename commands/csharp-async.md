@@ -1,6 +1,6 @@
 ---
-description: 변경된 C# 파일의 sync-over-async 패턴(.Result, .Wait, .GetAwaiter().GetResult())을 async/await로 변환합니다.
-argument_hint: "[경로 또는 프로젝트 타입 (library|aspnetcore|wpf|winforms|console)]"
+description: Convert sync-over-async patterns in changed C# files, such as .Result, .Wait, and .GetAwaiter().GetResult(), to async/await.
+argument_hint: "[path or project type (library|aspnetcore|wpf|winforms|console)]"
 allowed_tools: [bash, read, edit]
 ---
 

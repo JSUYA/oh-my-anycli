@@ -1,6 +1,6 @@
 ---
-description: C# 프로젝트에 nullable reference types를 활성화하고 발생한 CS86xx 경고를 분류합니다.
-argument_hint: "[csproj 경로 또는 scope (file|project|solution)]"
+description: Enable nullable reference types for a C# project and categorize the resulting CS86xx warnings.
+argument_hint: "[csproj path or scope (file|project|solution)]"
 allowed_tools: [bash, read, edit]
 ---
 

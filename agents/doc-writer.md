@@ -1,6 +1,6 @@
 ---
 name: doc-writer
-description: Specialist subagent for writing and maintaining technical documentation — READMEs, architecture docs, runbooks. Korean-primary, English-permitted for code and identifiers.
+description: Specialist subagent for writing and maintaining technical documentation — READMEs, architecture docs, and runbooks. Preserves code identifiers exactly.
 mode: subagent
 model: cline/default
 tools:

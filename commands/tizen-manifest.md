@@ -1,6 +1,6 @@
 ---
-description: tizen-manifest.xml의 API 버전, 애플리케이션 타입, 패키지 ID, 권한, 피처/카테고리/메타데이터 정합성을 점검합니다.
-argument_hint: "[tizen-manifest.xml 경로 또는 프로젝트 디렉터리]"
+description: Check tizen-manifest.xml for API version, application type, package ID, privileges, features, categories, and metadata consistency.
+argument_hint: "[tizen-manifest.xml path or project directory]"
 allowed_tools: [bash, read]
 ---
 

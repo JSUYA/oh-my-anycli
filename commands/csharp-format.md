@@ -1,6 +1,6 @@
 ---
-description: dotnet format으로 스타일 수정을 적용하고 Roslyn 분석기 경고를 STYLE/CORRECTNESS/PERFORMANCE/DESIGN으로 분류합니다.
-argument_hint: "[csproj 경로 또는 severity_floor]"
+description: Apply style fixes with dotnet format and categorize Roslyn analyzer warnings as STYLE, CORRECTNESS, PERFORMANCE, or DESIGN.
+argument_hint: "[csproj path or severity_floor]"
 allowed_tools: [bash, read, edit]
 ---
 

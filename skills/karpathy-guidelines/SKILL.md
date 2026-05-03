@@ -6,7 +6,7 @@ when_to_use: User invokes "/karpathy", "/guidelines", or asks for the Karpathy g
 inputs: []
 required_tools: [read]
 
-# Attribution / 출처
+# Attribution
 # Adapted from forrestchang/andrej-karpathy-skills (skills/karpathy-guidelines/SKILL.md),
 # which is itself derived from Andrej Karpathy's public observations on LLM coding pitfalls.
 # Upstream: https://github.com/forrestchang/andrej-karpathy-skills

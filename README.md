@@ -12,24 +12,22 @@ copyrightable expression.
 | Inspiration | License | What we took | What we deliberately changed |
 |---|---|---|---|
 | [`oh-my-zsh`](https://github.com/ohmyzsh/ohmyzsh) | MIT | The "git clone + ./install.sh + custom plugin slot + update via git pull" lifecycle | Targets opencode/cline instead of zsh |
-| [`alvinunreal/oh-my-opencode-slim`](https://github.com/alvinunreal/oh-my-opencode-slim) | MIT | The `.opencode/skills/<name>/SKILL.md` + `.opencode/command/<name>.md` frontmatter pattern | TypeScript/Bun plugin → pure markdown + bash (no runtime); single config file → manifest-based install with `custom/` safe zone; embedded MCP / multiplexer / interview server features omitted (internal-network constraint) |
+| [`alvinunreal/oh-my-opencode-slim`](https://github.com/alvinunreal/oh-my-opencode-slim) | MIT | The `.opencode/skills/<name>/SKILL.md` + `.opencode/command/<name>.md` frontmatter pattern | TypeScript/Bun plugin -> pure markdown + bash (no runtime); single config file -> manifest-based install with `custom/` safe zone; embedded MCP / multiplexer / interview server features omitted to keep this project focused |
 
-**Specific intranet-driven deviations:**
+**Specific design choices:**
 
-- **Pure markdown + bash, no TypeScript runtime** — zero build step, runs on a
-  locked-down workstation with only `bash` + standard unix tools
-- **No external MCP servers** — web-search, Context7, grep.app, `mcp.exa.ai`,
-  Divoom Bluetooth, browser interview servers all dropped; only intranet-safe
-  artifacts ship
+- **Pure markdown + bash, no TypeScript runtime** — zero build step, runs with
+  `bash` and standard Unix tools
+- **No bundled MCP servers** — web-search, Context7, grep.app, `mcp.exa.ai`,
+  Divoom Bluetooth, and browser interview servers are out of scope for this
+  collection
 - **All sub-agents pinned to `model: cline/default`** — enforced by
   `tests/lint-agents.sh` and `install.sh`, because openclineclicode exposes
-  exactly one model id (intranet constraint)
+  exactly one model id
 - **Functional agent names** (`code-reviewer`, `dba`, `release-manager`)
   instead of literary character names — easier for new contributors to read
 - **`omc plugin add <git-url>`** allows third-party plugins from any git host;
   upstream forks typically only accept PRs to a single monorepo
-- **Korean primary docs** for the contributor-facing guides, since the target
-  audience is Korean-speaking corporate engineering teams
 - **Coding-language-specific skills** added: C/C++ (`cpp-modernize`,
   `cpp-static-analysis`, `cmake-review`), Rust (`rust-clippy-triage`,
   `rust-unsafe-review`, `rust-idiom-modernize`), C#/.NET (`csharp-nullable-migrate`,

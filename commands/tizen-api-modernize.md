@@ -1,6 +1,6 @@
 ---
-description: 변경된 파일에서 deprecated된 Tizen 네이티브 API 사용을 찾아 교체 함수, 헤더, 마이그레이션 노트를 보고합니다.
-argument_hint: "[경로 또는 target_api (예: 8.0)]"
+description: Find deprecated Tizen native API usage in changed files and report replacement functions, headers, and migration notes.
+argument_hint: "[path or target_api, for example 8.0]"
 allowed_tools: [bash, read]
 ---
 

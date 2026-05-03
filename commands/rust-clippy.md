@@ -1,6 +1,6 @@
 ---
-description: cargo clippy를 변경된 파일에 실행하고 결과를 카테고리별로 분류해 승인 시 자동 수정을 적용합니다.
-argument_hint: "[패키지 또는 경로]"
+description: Run cargo clippy on changed files, categorize the findings, and apply automatic fixes only when approved.
+argument_hint: "[package or path]"
 allowed_tools: [bash, read, edit]
 ---
 

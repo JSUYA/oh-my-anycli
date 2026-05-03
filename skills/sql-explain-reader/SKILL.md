@@ -1,6 +1,6 @@
 ---
 name: sql-explain-reader
-description: Interprets a SQL EXPLAIN or EXPLAIN ANALYZE output (Postgres / MySQL / SQLite) in plain Korean — scan types, why an index might help, sequential vs index scan trade-offs, sort/hash join cost. Read-only; never connects to a database.
+description: Interprets a SQL EXPLAIN or EXPLAIN ANALYZE output for Postgres, MySQL, or SQLite in plain English, covering scan types, index trade-offs, sort/hash join cost, and related performance clues. Read-only; never connects to a database.
 version: 1.0.0
 when_to_use: Use this when the user asks for sql explain reader support.
 inputs:

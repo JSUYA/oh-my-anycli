@@ -100,7 +100,7 @@ Read `tizen-manifest.xml` and report findings against a checklist covering: API/
 
    ### G. Icons and labels (LOW)
    - `<icon>app.png</icon>` — file under `shared/res/` (or platform-default path).
-   - `<label>App Name</label>` — locale variants via `<label xml:lang="ko-kr">앱이름</label>`.
+   - `<label>App Name</label>` — locale variants via `<label xml:lang="ko-kr">Localized App Name</label>`.
 
    ### H. Account, data control, app-defined privileges (MEDIUM)
    - `<account>...</account>` requires the `account.read` / `account.write` privileges and registers the app as an account provider.

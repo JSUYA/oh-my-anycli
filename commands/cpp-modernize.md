@@ -1,6 +1,6 @@
 ---
-description: 변경된 C/C++ 파일을 모던 C++17/20 관용구로 마이그레이션하고 위험도별로 분류합니다.
-argument_hint: "[경로 또는 표준 (예: c++17)]"
+description: Migrate changed C/C++ files toward modern C++17/20 idioms and categorize risks.
+argument_hint: "[path or standard, for example c++17]"
 allowed_tools: [bash, read, edit]
 ---
 

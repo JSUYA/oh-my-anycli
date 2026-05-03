@@ -1,6 +1,6 @@
 ---
-description: tizen-manifest.xml에 선언된 권한과 실제 소스 코드의 API 호출을 대조해 UNUSED/MISSING 권한을 보고합니다.
-argument_hint: "[프로젝트 경로]"
+description: Compare privileges declared in tizen-manifest.xml with API calls in source code and report UNUSED or MISSING privileges.
+argument_hint: "[project path]"
 allowed_tools: [bash, read]
 ---
 

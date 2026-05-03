@@ -1,8 +1,8 @@
 ---
 name: git-commit-helper
-description: Drafts a Korean-friendly conventional commit message from the staged changes. Honors any project commit conventions found in CLAUDE.md, AGENTS.md, or CONTRIBUTING; otherwise emits a clean, neutral message.
+description: Drafts a conventional commit message from staged changes. Honors any project commit conventions found in CLAUDE.md, AGENTS.md, or CONTRIBUTING; otherwise emits a clean, neutral message.
 version: 1.1.0
-when_to_use: User asks "/commit", "make a commit message", or has staged changes ready to commit. Especially useful when the user wants the message in Korean but the commit-type prefix in English (Conventional Commits).
+when_to_use: User asks "/commit", "make a commit message", or has staged changes ready to commit. Especially useful when the user wants a concise Conventional Commits-style message.
 inputs:
   - name: scope_hint
     description: Optional scope (e.g. "auth", "ui") if the user wants to override the auto-detected scope.
