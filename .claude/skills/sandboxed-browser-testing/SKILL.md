@@ -9,8 +9,8 @@ Use this workflow whenever a task requires web browser testing, UI automation, s
 
 ## Hard requirements
 
-- Docker must be available before browser testing. On Ubuntu, install it with `sudo apt-get update && sudo apt-get install -y docker.io`, then verify with `docker --version`.
-- If Docker was just installed, start it with `sudo systemctl enable --now docker` or `sudo service docker start`, then verify with `docker run --rm hello-world`.
+- Docker must be available before browser testing; verify with `docker --version`.
+- If Docker is missing or not running, explain that browser tests require Docker and ask before installing packages or changing system services.
 - Run browser tests only inside Docker containers.
 - Prefer the official Playwright Docker image (`mcr.microsoft.com/playwright`) when Playwright is needed.
 - Use the image tag that matches the project's `@playwright/test` version when possible; otherwise use the pinned default in this skill.
@@ -26,7 +26,7 @@ Use this workflow whenever a task requires web browser testing, UI automation, s
 
 ## Default Docker Playwright command
 
-If Docker is missing and package installation is allowed, install the OS package first. Do not install Playwright browsers on the host as a fallback.
+If Docker is missing and package installation is approved, install Docker through the host OS package manager and verify it first. Do not install Playwright browsers on the host as a fallback.
 
 From the target project root, use this pattern:
 
