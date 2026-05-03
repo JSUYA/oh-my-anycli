@@ -1,0 +1,313 @@
+#!/usr/bin/env bash
+#
+# omc — oh-my-clinecli CLI.
+#
+# Pure bash, zero dependencies. Dispatched via a `case` statement.
+#
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || printf "%s" "${BASH_SOURCE[0]}")")" && pwd)"
+# shellcheck source=lib/colors.sh
+. "$SCRIPT_DIR/lib/colors.sh"
+# shellcheck source=lib/log.sh
+. "$SCRIPT_DIR/lib/log.sh"
+# shellcheck source=lib/common.sh
+. "$SCRIPT_DIR/lib/common.sh"
+
+INSTALL_DIR="$(omc_install_dir)"
+TARGET_DIR="$(omc_target_dir)"
+
+usage() {
+  local skill_count cmd_count agent_count
+  skill_count="$(omc_count "$INSTALL_DIR/skills" 'SKILL.md')"
+  cmd_count="$(omc_count "$INSTALL_DIR/commands" '*.md')"
+  agent_count="$(omc_count "$INSTALL_DIR/agents" '*.md')"
+  cat <<EOF
+$(omc_color_bold "omc") — oh-my-clinecli CLI ($(omc_version))
+
+Commands:
+  omc list [-v]                  list installed artifacts
+  omc search <keyword>           search skills, commands, and agents
+  omc info <name>                show one artifact's frontmatter
+  omc skill list                 list skills
+  omc command list               list commands
+  omc agent list                 list agents
+  omc plugin list                list plugins
+  omc plugin add <git-url>       add plugin
+  omc plugin remove <name>       remove plugin
+  omc update [--prune]           git pull && reapply
+  omc reapply                    install.sh --reapply
+  omc doctor                     run installation diagnostics
+  omc version                    print version
+Installed counts:
+  skills:   $skill_count
+  commands: $cmd_count
+  agents:   $agent_count
+EOF
+}
+
+list_dir_basenames() {
+  # list_dir_basenames <dir> <ext> [src_dir]  — print basenames sorted, dim
+  # the empty case. If LIST_VERBOSE=1 is set and src_dir is provided, also
+  # print the description from the source frontmatter under each name.
+  local dir="$1" ext="${2:-}" src_dir="${3:-}"
+  if [ ! -d "$dir" ]; then
+    printf "  %b\n" "$(omc_color_dim "(directory none: $dir)")"
+    return
+  fi
+  local found=0 name desc src
+  if [ -n "$ext" ]; then
+    for f in "$dir"/*."$ext"; do
+      [ -f "$f" ] || continue
+      name="$(basename "$f")"
+      printf "  %s\n" "$name"
+      if [ "${LIST_VERBOSE:-0}" = "1" ] && [ -n "$src_dir" ] && [ -f "$src_dir/$name" ]; then
+        desc="$(omc_frontmatter_get "$src_dir/$name" description 2>/dev/null || true)"
+        [ -n "$desc" ] && printf "    %b\n" "$(omc_color_dim "$desc")"
+      fi
+      found=1
+    done
+  else
+    for d in "$dir"/*/; do
+      [ -d "$d" ] || continue
+      name="$(basename "$d")"
+      printf "  %s\n" "$name"
+      if [ "${LIST_VERBOSE:-0}" = "1" ] && [ -n "$src_dir" ] && [ -f "$src_dir/$name/SKILL.md" ]; then
+        desc="$(omc_frontmatter_get "$src_dir/$name/SKILL.md" description 2>/dev/null || true)"
+        [ -n "$desc" ] && printf "    %b\n" "$(omc_color_dim "$desc")"
+      fi
+      found=1
+    done
+  fi
+  if [ "$found" = "0" ]; then
+    printf "  %b\n" "$(omc_color_dim "(none)")"
+  fi
+}
+
+cmd_skill_list() {
+  printf "%b\n" "$(omc_color_bold "Skills [$TARGET_DIR/skills]")"
+  list_dir_basenames "$TARGET_DIR/skills" "" "$INSTALL_DIR/skills"
+}
+
+cmd_command_list() {
+  printf "%b\n" "$(omc_color_bold "Commands [$TARGET_DIR/commands]")"
+  list_dir_basenames "$TARGET_DIR/commands" md "$INSTALL_DIR/commands"
+}
+
+cmd_agent_list() {
+  printf "%b\n" "$(omc_color_bold "Agents [$TARGET_DIR/agents]")"
+  list_dir_basenames "$TARGET_DIR/agents" md "$INSTALL_DIR/agents"
+}
+
+cmd_plugin_list() {
+  printf "%b\n" "$(omc_color_bold "Plugins [$INSTALL_DIR/plugins]")"
+  if [ ! -d "$INSTALL_DIR/plugins" ]; then
+    printf "  %b\n" "$(omc_color_dim "(plugins/ directory none)")"
+    return
+  fi
+  local found=0
+  for d in "$INSTALL_DIR/plugins"/*/; do
+    [ -d "$d" ] || continue
+    name="$(basename "$d")"
+    case "$name" in examples) continue ;; esac
+    found=1
+    if [ -f "$d/plugin.json" ]; then
+      ver="$(grep -E '"version"' "$d/plugin.json" | head -n1 | sed -E 's/.*"version"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/' || true)"
+      printf "  %s  %b\n" "$name" "$(omc_color_dim "(v${ver:-?})")"
+    else
+      printf "  %s  %b\n" "$name" "$(omc_color_yellow "(plugin.json none)")"
+    fi
+  done
+  [ "$found" = "0" ] && printf "  %b\n" "$(omc_color_dim "(none)")"
+}
+
+cmd_list_all() {
+  local skill_count cmd_count agent_count arg
+  for arg in "$@"; do
+    case "$arg" in
+      -v|--verbose) export LIST_VERBOSE=1 ;;
+      *) omc_die "unknown list option: $arg" ;;
+    esac
+  done
+  skill_count="$(omc_count "$INSTALL_DIR/skills" 'SKILL.md')"
+  cmd_count="$(omc_count "$INSTALL_DIR/commands" '*.md')"
+  agent_count="$(omc_count "$INSTALL_DIR/agents" '*.md')"
+  printf "%b\n" "$(omc_color_dim "Installed artifacts: skills=$skill_count commands=$cmd_count agents=$agent_count")"
+  printf "\n"
+  cmd_skill_list;   printf "\n"
+  cmd_command_list; printf "\n"
+  cmd_agent_list;   printf "\n"
+  cmd_plugin_list
+  unset LIST_VERBOSE
+}
+
+# omc info <name> — print frontmatter as key:value lines for the named
+# artifact. Looks under skills/ first, then commands/, then agents/. If
+# multiple categories match, prints all.
+cmd_info() {
+  local name="${1:-}"
+  [ -n "$name" ] || omc_die "omc info <name>"
+  local found=0
+
+  _info_print() {
+    local kind="$1" path="$2"
+    [ -f "$path" ] || return 1
+    printf "%b  %b\n" "$(omc_color_bold "[$kind]")" "$(omc_color_dim "$path")"
+    omc_parse_frontmatter "$path" \
+      | awk -F= '{ key=$1; sub(/^[^=]*=/, "", $0); printf "  %-16s %s\n", key":", $0 }'
+    printf "\n"
+    return 0
+  }
+
+  # Skill (directory under skills/)
+  if [ -f "$INSTALL_DIR/skills/$name/SKILL.md" ]; then
+    _info_print "Skill" "$INSTALL_DIR/skills/$name/SKILL.md" && found=1
+  fi
+  # Command (markdown under commands/)
+  if [ -f "$INSTALL_DIR/commands/$name.md" ]; then
+    _info_print "Command" "$INSTALL_DIR/commands/$name.md" && found=1
+  fi
+  # Agent (markdown under agents/)
+  if [ -f "$INSTALL_DIR/agents/$name.md" ]; then
+    _info_print "Agent" "$INSTALL_DIR/agents/$name.md" && found=1
+  fi
+
+  if [ "$found" = "0" ]; then
+    omc_log_error "No artifact named '$name' found."
+    printf "Try: omc search <keyword>\n"
+    exit 1
+  fi
+}
+
+# omc search <keyword> — case-insensitive grep across name/description/when_to_use
+# frontmatter fields of every skill/command/agent in the install dir.
+cmd_search() {
+  local keyword="${1:-}"
+  [ -n "$keyword" ] || omc_die "omc search <keyword>"
+  local lc_kw
+  lc_kw="$(printf "%s" "$keyword" | tr '[:upper:]' '[:lower:]')"
+
+  _search_artifact() {
+    local kind="$1" dir="$2" filename="$3"
+    [ -d "$dir" ] || return 0
+    local first=1
+    while IFS= read -r -d '' f; do
+      local name desc when haystack
+      name="$(omc_frontmatter_get "$f" name 2>/dev/null || true)"
+      desc="$(omc_frontmatter_get "$f" description 2>/dev/null || true)"
+      when="$(omc_frontmatter_get "$f" when_to_use 2>/dev/null || true)"
+      # Fallback to filename: SKILL.md → parent dir name; *.md → file basename minus .md
+      if [ -z "$name" ]; then
+        if [ "$(basename "$f")" = "SKILL.md" ]; then
+          name="$(basename "$(dirname "$f")")"
+        else
+          name="$(basename "$f" .md)"
+        fi
+      fi
+      haystack="$(printf "%s\n%s\n%s" "$name" "$desc" "$when" | tr '[:upper:]' '[:lower:]')"
+      case "$haystack" in
+        *"$lc_kw"*)
+          if [ "$first" = "1" ]; then
+            printf "%b\n" "$(omc_color_bold "$kind")"
+            first=0
+          fi
+          printf "  %s\n" "$name"
+          [ -n "$desc" ] && printf "    %b\n" "$(omc_color_dim "$desc")"
+          ;;
+      esac
+    done < <(find "$dir" -type f -name "$filename" -print0 2>/dev/null)
+    if [ "$first" = "0" ]; then
+      printf "\n"
+    fi
+    return 0
+  }
+
+  _search_artifact "Skills"   "$INSTALL_DIR/skills"   "SKILL.md"
+  _search_artifact "Commands" "$INSTALL_DIR/commands" "*.md"
+  _search_artifact "Agents"   "$INSTALL_DIR/agents"   "*.md"
+}
+
+cmd_plugin_add() {
+  local url="${1:-}"
+  [ -n "$url" ] || omc_die "omc plugin add <git-url>"
+  command -v git >/dev/null 2>&1 || omc_die "git is required for plugin operations"
+  local name dst
+  name="$(omc_plugin_name_from_url "$url")"
+  dst="$INSTALL_DIR/plugins/$name"
+  if [ -d "$dst" ]; then
+    omc_die "plugin '$name' already exists: $dst"
+  fi
+  omc_ensure_dir "$INSTALL_DIR/plugins"
+  omc_log_step "Cloning plugin $name"
+  git clone "$url" "$dst"
+  if [ ! -f "$dst/plugin.json" ]; then
+    omc_log_warn "plugin.json not found in $name; install may be incomplete"
+  fi
+  "$INSTALL_DIR/install.sh" --reapply
+  omc_log_ok "plugin added: $name"
+}
+
+cmd_plugin_remove() {
+  local name="${1:-}"
+  [ -n "$name" ] || omc_die "omc plugin remove <name>"
+  local dir="$INSTALL_DIR/plugins/$name"
+  [ -d "$dir" ] || omc_die "plugin not found: $name"
+  omc_log_step "Removing plugin $name"
+  rm -rf "$dir"
+  "$INSTALL_DIR/install.sh" --reapply --prune
+  omc_log_ok "plugin removed: $name"
+}
+
+cmd_update()  { "$INSTALL_DIR/update.sh" "$@"; }
+cmd_reapply() { "$INSTALL_DIR/install.sh" --reapply; }
+cmd_doctor()  { "$INSTALL_DIR/doctor.sh"; }
+cmd_version() { printf "oh-my-clinecli %s\n" "$(omc_version)"; }
+
+main() {
+  local sub="${1:-help}"
+  shift || true
+  case "$sub" in
+    help|-h|--help) usage ;;
+    version|-v|--version) cmd_version ;;
+    list)    cmd_list_all "$@" ;;
+    search)  cmd_search "${1:-}" ;;
+    info)    cmd_info "${1:-}" ;;
+    skill)
+      case "${1:-list}" in
+        list) cmd_skill_list ;;
+        *) omc_die "omc skill list" ;;
+      esac
+      ;;
+    command)
+      case "${1:-list}" in
+        list) cmd_command_list ;;
+        *) omc_die "omc command list" ;;
+      esac
+      ;;
+    agent)
+      case "${1:-list}" in
+        list) cmd_agent_list ;;
+        *) omc_die "omc agent list" ;;
+      esac
+      ;;
+    plugin)
+      local action="${1:-list}"; shift || true
+      case "$action" in
+        list)   cmd_plugin_list ;;
+        add)    cmd_plugin_add "$@" ;;
+        remove|rm) cmd_plugin_remove "$@" ;;
+        *) omc_die "omc plugin {list|add|remove}" ;;
+      esac
+      ;;
+    update)  cmd_update "$@" ;;
+    reapply) cmd_reapply ;;
+    doctor)  cmd_doctor ;;
+    *)
+      omc_log_error "unknown command: $sub"
+      usage
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

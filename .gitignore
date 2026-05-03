@@ -1,0 +1,21 @@
+# Gitignore
+custom/*
+!custom/.gitkeep
+!custom/README.md
+
+# OS / editor noise
+.DS_Store
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Backup files produced by install --reapply
+*.omc.bak
+
+# Defensive: this project has no Node deps, but a contributor might add some
+node_modules/
+
+# QA / temporary directories produced by tests/verify-install.sh runs
+.qa-tmp/
