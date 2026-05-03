@@ -28,15 +28,18 @@ copyrightable expression.
   instead of literary character names — easier for new contributors to read
 - **`omc plugin add <git-url>`** allows third-party plugins from any git host;
   upstream forks typically only accept PRs to a single monorepo
-- **Korean primary docs** for the standup/weekly/handoff workflows, since the
-  target audience is Korean-speaking corporate engineering teams
-- **Internal-network-specific skills** added: `internal-network-deps-audit`,
-  `standup-summary`, `weekly-report`, `handoff-doc`
+- **Korean primary docs** for the contributor-facing guides, since the target
+  audience is Korean-speaking corporate engineering teams
+- **Coding-language-specific skills** added: C/C++ (`cpp-modernize`,
+  `cpp-static-analysis`, `cmake-review`), Rust (`rust-clippy-triage`,
+  `rust-unsafe-review`, `rust-idiom-modernize`), C#/.NET (`csharp-nullable-migrate`,
+  `csharp-async-modernize`, `csharp-analyzer-fix`), Tizen (`tizen-manifest-review`,
+  `tizen-api-modernize`, `tizen-privilege-audit`)
 
 ## What It Provides
 
-- 27 skills for review, testing, documentation, DevOps, database, API, security, and reporting workflows.
-- 31 slash commands that route common tasks to those skills.
+- 35 skills for review, testing, documentation, DevOps, database, API, security, and language-specific coding workflows (C/C++, Rust, C#, Tizen).
+- 36 slash commands that route common tasks to those skills.
 - 10 subagents pinned to `model: cline/default` for openclineclicode compatibility.
 - A Bash `omc` helper for listing, searching, installing, updating, and diagnosing the collection.
 - A plugin slot for team- or project-specific extensions.
