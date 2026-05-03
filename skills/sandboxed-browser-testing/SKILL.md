@@ -39,8 +39,8 @@ Refuse to run if any of these is missing — emit the exact one-line fix:
 
 | Requirement | Fix |
 |---|---|
-| `docker` on PATH | `opencode-anycli --setup-docker` |
-| `docker info` works without sudo | `newgrp docker` (or log out / log in) after `--setup-docker` |
+| `docker` on PATH | Linux: `sudo apt install docker.io` (or `dnf install docker`, `pacman -S docker`, etc.); macOS: `brew install --cask docker` / `colima` / `orbstack`. If the agent itself needs to do the install, restart with `opencode-anycli --allow-dangerously-skip-permissions` so it can run the package manager as root in this session. |
+| `docker info` works for the current user | Linux: `sudo usermod -aG docker $USER` then `newgrp docker` (or re-login). Same `--allow-dangerously-skip-permissions` shortcut applies if the agent is doing the setup. |
 | `mcr.microsoft.com/playwright:latest` image | `docker pull mcr.microsoft.com/playwright:latest` (auto in Step 2) |
 | Network egress to mcr.microsoft.com (one-time pull) | confirm with `docker pull hello-world` first |
 
@@ -56,7 +56,7 @@ outside the container. Refuse with a one-line explanation if asked.
 # verify docker without sudo
 docker info >/dev/null 2>&1 \
   && echo "docker OK" \
-  || { echo "docker not available — run: opencode-anycli --setup-docker, then 'newgrp docker'"; exit 1; }
+  || { echo "docker not available — install Docker (apt/dnf/brew/colima/...) and add yourself to the docker group, OR restart with 'opencode-anycli --allow-dangerously-skip-permissions' so the agent can install + start it as root"; exit 1; }
 ```
 
 If this fails, STOP and surface the fix command. Do not proceed.
@@ -166,7 +166,9 @@ Reply with:
 3. After running, the script's stdout (status, title, file list) plus a
    reference to the screenshot path.
 4. If anything failed, the EXACT error line and the next thing to try
-   (usually a `--setup-docker` or `newgrp docker` reminder).
+   (usually `newgrp docker`, an explicit Docker install command for the
+   user's distro, or a hint to restart opencode-anycli with
+   `--allow-dangerously-skip-permissions`).
 
 ## Anti-patterns
 

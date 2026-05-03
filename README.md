@@ -108,26 +108,32 @@ opencode-anycli --update          # git pull + ./install.sh inside opencode-anyc
 ## Interactive Subprocesses (sudo, ssh-add, ...)
 
 opencode-anycli keeps the cline subprocess's stdin connected to your
-terminal by default. If `sudo apt install ...` (or any package-manager
-command) still fails because the inner bash tool doesn't forward stdin,
-the wrapper ships an auto-installer for a scoped sudoers rule:
+terminal by default. If `sudo apt install ...` (or any other privileged
+command) still fails inside an agent run because the inner bash tool
+doesn't forward stdin, restart the session with the single-flag escape
+hatch:
 
 ```bash
-opencode-anycli --setup-sudo            # interactive: detect + confirm + apply
-opencode-anycli --setup-sudo --yes      # non-interactive
-opencode-anycli --setup-sudo --print    # preview, do not write
-opencode-anycli --setup-sudo --remove   # undo
+opencode-anycli --allow-dangerously-skip-permissions
+opencode-anycli --dangerously-skip-permissions      # alias
+OPENCODE_ANYCLI_DANGEROUS=1 opencode-anycli         # env-var equivalent
 ```
 
-It auto-detects `apt`/`dnf`/`yum`/`pacman`/`zypper`/`apk`, writes a
-scoped `/etc/sudoers.d/opencode-anycli` (NEVER `NOPASSWD: ALL`),
-validates with `visudo`. macOS short-circuits (Homebrew = no sudo).
+The wrapper re-execs itself under `sudo -E` (one password prompt up
+front), so the inner cline + bash subprocesses run as root and can
+install packages, start daemons, run Docker, or any other privileged
+operation without ever hitting another prompt. **Nothing is written to
+`/etc/sudoers.d/`** and there is no persistent privilege change.
 
-For prompts beyond the package manager (ssh-add, gh auth login),
-use `/sudo` — invokes the `sudo-helper` skill that walks you through
-SUDO_ASKPASS or pre-authorising the sudo cache.
+The flag also implies `--auto-approve`, so opencode's per-tool
+permission prompts are silenced for the same session.
 
-To opt out (CI / piped input):
+Trade-off: files created during the session will be root-owned. The
+flag is named `dangerously` for a reason — only opt in when you trust
+the agent's full action set and ideally run inside a disposable VM /
+container / fresh checkout.
+
+To opt out of the TTY default (CI / piped input):
 
 ```bash
 opencode-anycli --no-tty
