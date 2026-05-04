@@ -5,25 +5,28 @@ allowed_tools: [bash, read]
 ---
 
 <command-instruction>
-Invoke the `sudo-helper` skill. The fastest fix for "sudo doesn't work
-inside the session" is the bundled auto-installer:
+Invoke the `sudo-helper` skill. The recommended fix for "sudo doesn't
+work inside the session" is to restart with one flag:
 
-   opencode-anycli --setup-sudo
+   opencode-anycli --allow-dangerously-skip-permissions
 
-This auto-detects the user's package manager (apt/dnf/yum/pacman/zypper/
-apk) and writes a SCOPED /etc/sudoers.d/opencode-anycli rule (NOPASSWD
-for those binaries only — never NOPASSWD: ALL). macOS short-circuits
-because Homebrew does not need sudo.
+This re-execs the whole session under sudo -E (one password prompt at
+startup), so the inner cline + bash subprocesses run as root and can
+install packages, start daemons, run docker, etc. without any further
+prompts. Nothing is written to /etc/sudoers.d/. Implies --auto-approve
+for the same session. Trade-off: files created during the session
+become root-owned.
 
-If the user needs prompts beyond the package manager (ssh-add,
-gh auth login, custom scripts), walk them through the two remaining
-workarounds in order:
+If the user does not want full-session elevation (only one command
+needs root, or root-owned outputs are unacceptable), walk them through
+the two narrower workarounds in order:
 
-  1. SUDO_ASKPASS helper (GUI password prompt).
+  1. SUDO_ASKPASS helper (GUI password prompt; `sudo -A`-style use).
   2. Pre-authorise the sudo cache (sudo -v outside OpenCode-AnyCLI,
-     then launch within the cache TTL).
+     then launch within the cache TTL — fragile across tty boundaries).
 
-Never recommend NOPASSWD: ALL. Never put a literal password in the
-prompt. The cline subprocess's --yolo is unrelated to sudo and must
-not be turned off.
+Never recommend NOPASSWD: ALL or any manual sudoers edit. Never
+mention the removed --setup-sudo / --setup-docker flags. Never put a
+literal password in the prompt. The cline subprocess's --yolo is
+unrelated to sudo and must not be turned off.
 </command-instruction>
