@@ -1,6 +1,6 @@
-# oh-my-anycli
+# Oh-My-AnyCLI
 
-oh-my-anycli adds reusable skills, slash commands, subagents, and plugins to opencode-anycli.
+Oh-My-AnyCLI adds reusable skills, slash commands, subagents, and plugins to OpenCode-AnyCLI.
 
 ## Inspirations & how this project deviates from them
 
@@ -22,7 +22,7 @@ copyrightable expression.
   Divoom Bluetooth, and browser interview servers are out of scope for this
   collection
 - **All sub-agents pinned to `model: cline/default`** — enforced by
-  `tests/lint-agents.sh` and `install.sh`, because opencode-anycli exposes
+  `tests/lint-agents.sh` and `install.sh`, because OpenCode-AnyCLI exposes
   exactly one model id
 - **Functional agent names** (`code-reviewer`, `dba`, `release-manager`)
   instead of literary character names — easier for new contributors to read
@@ -38,13 +38,13 @@ copyrightable expression.
 
 - 39 skills for review, testing, documentation, DevOps, database, API, security, sandboxed browser testing, language-specific coding workflows (C/C++, Rust, C#, Tizen), and behavioral guidelines (Karpathy guidelines).
 - 40 slash commands that route common tasks to those skills.
-- 12 subagents pinned to `model: cline/default` for opencode-anycli compatibility (10 original + 2 adapted from `alvinunreal/oh-my-opencode-slim` (MIT): `orchestrator`, `oracle`).
+- 12 subagents pinned to `model: cline/default` for OpenCode-AnyCLI compatibility (10 original + 2 adapted from `alvinunreal/oh-my-opencode-slim` (MIT): `orchestrator`, `oracle`).
 - A Bash `omac` helper for listing, searching, installing, updating, and diagnosing the collection.
 - A plugin slot for team- or project-specific extensions.
 
 ## Coding Advantages Over Plain cline CLI
 
-oh-my-anycli does not change the model that cline uses. It improves coding outcomes by turning common development tasks into reusable workflows with explicit checks.
+Oh-My-AnyCLI does not change the model that cline uses. It improves coding outcomes by turning common development tasks into reusable workflows with explicit checks.
 
 - **Feature work becomes more disciplined.** Skills can steer the agent to read existing patterns first, make scoped changes, and report verification instead of producing an isolated patch.
 - **Runtime fixes become more evidence-based.** Debugging-oriented workflows encourage reproduction, stack-trace reading, dependency checks, ranked root-cause hypotheses, and minimal fixes.
@@ -53,7 +53,7 @@ oh-my-anycli does not change the model that cline uses. It improves coding outco
 - **Specialized domains get targeted criteria.** Security, database, Dockerfile, CI, release, API, and documentation tasks each get their own checklist instead of relying on a generic prompt.
 - **Project standards are reusable.** The same commands, skills, and subagents can be versioned, reviewed, installed, updated, and extended through plugins.
 
-Plain cline CLI is still the simpler choice for very small one-off edits. oh-my-anycli pays off when implementation, debugging, review, and verification need to happen as one repeatable development loop.
+Plain cline CLI is still the simpler choice for very small one-off edits. Oh-My-AnyCLI pays off when implementation, debugging, review, and verification need to happen as one repeatable development loop.
 
 ## Install
 
@@ -63,7 +63,7 @@ git clone https://github.com/JSUYA/oh-my-anycli.git ~/.oh-my-anycli
 omac doctor
 ```
 
-opencode-anycli should be installed first so the target config directory exists.
+OpenCode-AnyCLI should be installed first so the target config directory exists.
 
 ## Uninstall
 
@@ -107,7 +107,7 @@ opencode-anycli --update          # git pull + ./install.sh inside opencode-anyc
 
 ## Interactive Subprocesses (sudo, ssh-add, ...)
 
-opencode-anycli keeps the cline subprocess's stdin connected to your
+OpenCode-AnyCLI keeps the cline subprocess's stdin connected to your
 terminal by default. If `sudo apt install ...` (or any other privileged
 command) still fails inside an agent run because the inner bash tool
 doesn't forward stdin, restart the session with the single-flag escape
@@ -143,9 +143,9 @@ export OPENCODE_ANYCLI_TTY=0
 
 ## Auto-approve (Yolo Mode)
 
-opencode-anycli prompts for approval on file edits, bash commands, web
+OpenCode-AnyCLI prompts for approval on file edits, bash commands, web
 fetches, and other gated tools. To silence those prompts for an unattended
-session, relaunch opencode-anycli with the auto-approve flag:
+session, relaunch OpenCode-AnyCLI with the auto-approve flag:
 
 ```bash
 opencode-anycli --auto-approve     # also accepts --yolo, -y
@@ -165,7 +165,7 @@ silently mutate the live session. See `skills/auto-approve/SKILL.md` for
 the full explanation, including the two-layer permission model
 (opencode outer vs cline inner) and the safety guidance.
 
-The cline subprocess that opencode-anycli spawns is already invoked with
+The cline subprocess that OpenCode-AnyCLI spawns is already invoked with
 `--yolo` by the provider, so the inner cline layer never asked for
 approval to begin with — `--auto-approve` only affects the outer
 opencode layer.

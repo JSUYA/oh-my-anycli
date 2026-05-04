@@ -1,6 +1,6 @@
 # Plugins
 
-Plugins extend oh-my-anycli with additional skills, commands, or agents.
+Plugins extend Oh-My-AnyCLI with additional skills, commands, or agents.
 
 ## Add a Plugin
 
@@ -8,7 +8,7 @@ Plugins extend oh-my-anycli with additional skills, commands, or agents.
 omac plugin add https://git.example.com/<your-org>/<plugin-repo>.git
 ```
 
-The plugin is cloned into `plugins/<name>/` and then installed into the opencode-anycli config directory with prefixed artifact names.
+The plugin is cloned into `plugins/<name>/` and then installed into the OpenCode-AnyCLI config directory with prefixed artifact names.
 
 ## Plugin Shape
 

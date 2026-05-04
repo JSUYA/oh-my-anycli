@@ -10,7 +10,7 @@ ls -l /usr/local/bin/omac ~/.local/bin/omac 2>/dev/null
 
 If it is in `~/.local/bin`, ensure that directory is in `PATH`.
 
-## Artifacts are not visible in opencode-anycli
+## Artifacts are not visible in OpenCode-AnyCLI
 
 Run:
 
@@ -19,7 +19,7 @@ omac doctor
 omac list -v
 ```
 
-Confirm `OMAC_TARGET_DIR` matches the opencode-anycli config directory you actually use.
+Confirm `OMAC_TARGET_DIR` matches the OpenCode-AnyCLI config directory you actually use.
 
 ## Existing files were not overwritten
 
@@ -48,7 +48,7 @@ mode: subagent
 model: cline/default
 ```
 
-Unsupported or missing models are rejected because opencode-anycli exposes `cline/default`.
+Unsupported or missing models are rejected because OpenCode-AnyCLI exposes `cline/default`.
 
 ## Plugin does not install
 

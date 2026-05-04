@@ -13,7 +13,7 @@ required_tools: [bash, read]
 
 Tell the user how to make interactive subprocess prompts (sudo password,
 ssh-add, gh auth login, expect-style password entry, etc.) actually work
-inside an opencode-anycli session. The honest answer involves multiple
+inside an OpenCode-AnyCLI session. The honest answer involves multiple
 layers and there is no single magic switch — explain each layer and the
 three practical workarounds.
 
@@ -46,7 +46,7 @@ The two layers we can control:
 
 | Layer | Default | How to disable |
 |---|---|---|
-| opencode-anycli wrapper | always inherits | (not configurable — TUI requires TTY) |
+| OpenCode-AnyCLI wrapper | always inherits | (not configurable — TUI requires TTY) |
 | cline subprocess (our provider) | **inherit** (TTY ON since v0.1.x) | `opencode-anycli --no-tty` or `OPENCODE_ANYCLI_TTY=0` (CI / piped input) |
 
 Layers we cannot control:
@@ -82,7 +82,7 @@ unattended / CI runs where cline must not consume stdin.)
 
 ## Step 2 — Workaround A: passwordless sudo for the package manager (RECOMMENDED)
 
-**Easiest, most reliable.** opencode-anycli ships an installer that
+**Easiest, most reliable.** OpenCode-AnyCLI ships an installer that
 auto-detects the user's package manager and writes a scoped sudoers
 rule:
 
@@ -98,7 +98,7 @@ circuits with a no-op (Homebrew does not need sudo). Validates with
 `visudo` before installing.
 
 After this, `sudo apt-get install <pkg>` runs without prompting from
-inside opencode-anycli sessions.
+inside OpenCode-AnyCLI sessions.
 
 If the user wants additional non-package-manager commands whitelisted,
 they can append to `/etc/sudoers.d/opencode-anycli` manually with
@@ -129,7 +129,7 @@ Tell the agent (in your prompt) to use `sudo -A` whenever it needs root.
 
 ## Step 4 — Workaround C: pre-authorize the session
 
-Run sudo once outside opencode-anycli to refresh the credential cache,
+Run sudo once outside OpenCode-AnyCLI to refresh the credential cache,
 then start the session within the cache TTL (default 5 min):
 
 ```bash

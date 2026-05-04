@@ -1,6 +1,6 @@
 # Update Flow
 
-Updates pull the latest repository content and reapply artifacts into the target opencode-anycli config directory.
+Updates pull the latest repository content and reapply artifacts into the target OpenCode-AnyCLI config directory.
 
 ## Standard update
 

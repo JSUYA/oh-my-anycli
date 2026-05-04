@@ -167,7 +167,7 @@ Reply with:
    reference to the screenshot path.
 4. If anything failed, the EXACT error line and the next thing to try
    (usually `newgrp docker`, an explicit Docker install command for the
-   user's distro, or a hint to restart opencode-anycli with
+   user's distro, or a hint to restart OpenCode-AnyCLI with
    `--allow-dangerously-skip-permissions`).
 
 ## Anti-patterns

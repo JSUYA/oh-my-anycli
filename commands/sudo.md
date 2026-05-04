@@ -20,7 +20,7 @@ gh auth login, custom scripts), walk them through the two remaining
 workarounds in order:
 
   1. SUDO_ASKPASS helper (GUI password prompt).
-  2. Pre-authorise the sudo cache (sudo -v outside opencode-anycli,
+  2. Pre-authorise the sudo cache (sudo -v outside OpenCode-AnyCLI,
      then launch within the cache TTL).
 
 Never recommend NOPASSWD: ALL. Never put a literal password in the

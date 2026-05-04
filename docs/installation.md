@@ -1,12 +1,12 @@
 # Installation
 
-oh-my-anycli installs reusable opencode-anycli artifacts into the local opencode-anycli config directory.
+Oh-My-AnyCLI installs reusable OpenCode-AnyCLI artifacts into the local OpenCode-AnyCLI config directory.
 
 ## Prerequisites
 
 - `git`
 - `bash`
-- opencode-anycli installed or a writable target config directory
+- OpenCode-AnyCLI installed or a writable target config directory
 
 The default target directory is `~/.config/opencode-anycli/opencode`. Override it with `OMAC_TARGET_DIR`.
 
@@ -42,7 +42,7 @@ It also links `omac` into `/usr/local/bin` when writable, otherwise `~/.local/bi
 | Variable | Meaning |
 | --- | --- |
 | `OMAC_INSTALL_DIR` | Override the checkout/install location. |
-| `OMAC_TARGET_DIR` | Override the opencode-anycli config directory. |
+| `OMAC_TARGET_DIR` | Override the OpenCode-AnyCLI config directory. |
 | `OMAC_REPO_URL` | Override the repository cloned by the auto-clone path. |
 
 ## Uninstall

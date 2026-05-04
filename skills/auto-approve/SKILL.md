@@ -11,7 +11,7 @@ required_tools: [bash, read]
 
 ## Goal
 
-Tell the user exactly how to enable auto-approve in opencode-anycli, what
+Tell the user exactly how to enable auto-approve in OpenCode-AnyCLI, what
 gets auto-approved, and what the limitations are. Auto-approve is a
 **session-scope** decision in opencode (config-driven, not runtime-toggleable),
 so the answer is always "relaunch with `--auto-approve`" — there is no
@@ -19,7 +19,7 @@ in-TUI toggle today.
 
 ## Two layers of permission to understand
 
-opencode-anycli wraps two agents that each have their own permission gate:
+OpenCode-AnyCLI wraps two agents that each have their own permission gate:
 
 | Layer | What it gates | Already auto-approve? | How to control |
 |---|---|---|---|
@@ -99,7 +99,7 @@ lead with the explanation. If the user asked both, command first.
   manages the config; the recommended path is `--auto-approve`.
 - Suggesting the user disable cline's `--yolo` to "regain control". Cline
   is the inner agent; turning off its yolo means cline will pause inside
-  every LLM call asking the user something — opencode-anycli has no UI
+  every LLM call asking the user something — OpenCode-AnyCLI has no UI
   channel for that, so it would just hang.
 - Recommending `--auto-approve` for production work without the risk
   warnings above.

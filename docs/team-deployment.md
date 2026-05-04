@@ -1,6 +1,6 @@
 # Team Deployment
 
-Teams can use oh-my-anycli as a shared baseline and extend it with plugins or a fork.
+Teams can use Oh-My-AnyCLI as a shared baseline and extend it with plugins or a fork.
 
 ## Recommended models
 

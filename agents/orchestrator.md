@@ -12,9 +12,9 @@ tools:
 # Attribution
 # Adapted from alvinunreal/oh-my-opencode-slim (src/agents/orchestrator.ts), MIT.
 # Upstream: https://github.com/alvinunreal/oh-my-opencode-slim
-# This adaptation: MIT (per oh-my-anycli's project license).
+# This adaptation: MIT (per Oh-My-AnyCLI's project license).
 # Changes from upstream:
-#   - Converted from TypeScript factory to oh-my-anycli markdown agent format
+#   - Converted from TypeScript factory to Oh-My-AnyCLI markdown agent format
 #   - Removed multi-provider model selection logic (forced model: cline/default)
 #   - Removed MCP/external-service dependencies and parallel session machinery
 #   - Replaced upstream's @explorer/@librarian/@designer/@observer/@council

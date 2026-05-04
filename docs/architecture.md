@@ -1,6 +1,6 @@
 # Architecture
 
-oh-my-anycli is a markdown-first artifact collection for opencode-anycli. It has no TypeScript or Python runtime; installation and maintenance are handled by Bash scripts.
+Oh-My-AnyCLI is a markdown-first artifact collection for OpenCode-AnyCLI. It has no TypeScript or Python runtime; installation and maintenance are handled by Bash scripts.
 
 ## Repository layout
 
@@ -11,7 +11,7 @@ oh-my-anycli is a markdown-first artifact collection for opencode-anycli. It has
 | `agents/<name>.md` | Subagent definitions pinned to `model: cline/default`. |
 | `plugins/<name>/` | Optional shareable extension packages. |
 | `custom/` | Local-only user additions; not managed as upstream artifacts. |
-| `install.sh` | Copies artifacts into the opencode-anycli target config. |
+| `install.sh` | Copies artifacts into the OpenCode-AnyCLI target config. |
 | `update.sh` | Runs `git pull --ff-only` and reapplies installed artifacts. |
 | `uninstall.sh` | Removes only manifest-tracked installed files. |
 | `omac` | Helper CLI for list/search/info/plugin/update/doctor commands. |
