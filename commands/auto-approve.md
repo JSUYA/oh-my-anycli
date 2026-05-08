@@ -1,27 +1,19 @@
 ---
-description: opencode-anycli의 auto-approve 사용법을 안내합니다 (재시작 명령 + 한계 설명).
+description: "opencode-anycli의 auto-approve 사용법을 안내합니다 (재시작 명령 + 한계 설명)."
 argument_hint: "(인자 없음)"
 allowed_tools: [bash, read]
+routes_to_skill: auto-approve
 ---
 
 <command-instruction>
-Invoke the `auto-approve` skill. Do not pretend a runtime toggle exists —
-opencode's permission system is loaded at session start. The honest answer
-is:
+Run the `auto-approve` skill workflow on the user's request.
 
-   Restart with: opencode-anycli --auto-approve
+When to use: User asks how to skip permission prompts ("yolo", "auto-approve", "stop asking me", "dangerous"), or invokes "/auto-approve". Also useful when the user is frustrated by repeated "Allow this edit?" prompts in a long-running session.
 
-Aliases: --yolo, -y. Or set OPENCODE_ANYCLI_AUTO_APPROVE=1 in the user's
-shell profile.
-
-Reply with three short blocks:
-1. The exact restart command.
-2. One paragraph on what gets auto-approved (every documented opencode
-   permission key set to "allow", with user-set "deny" rules preserved).
-3. One paragraph on why there is no runtime toggle, and the brief risk
-   warning (only use in throwaway dirs, branches with frequent commits,
-   never on production credentials).
-
-The cline subprocess already runs with --yolo; the user only needs to
-care about the OUTER opencode permission layer.
+Keep the task scoped to what the user asked for, preserve the project's
+existing conventions, and report findings or edits with concrete file:line
+references. Do not perform destructive Git, filesystem, or network
+operations unless the user explicitly requested them. If the matching
+skill (`auto-approve`) is not installed in this environment, follow the
+workflow described in skills/auto-approve/SKILL.md.
 </command-instruction>

@@ -1,11 +1,19 @@
 ---
-description: Validate a local OpenAPI or Swagger specification.
+description: "Validate a local OpenAPI or Swagger specification."
 argument_hint: "[optional arguments]"
 allowed_tools: [bash, read, grep]
+routes_to_skill: openapi-validator
 ---
 
 <command-instruction>
-Run the Openapi workflow in English.
+Run the `openapi-validator` skill workflow on the user's request.
 
-Use the matching skill when one exists. Keep the task scoped to the user's request, preserve project conventions, and report the result with concrete file or command references. Do not perform destructive Git, filesystem, or network operations unless the user explicitly requested them.
+When to use: User asks "/openapi", "validate this spec", or has just edited `openapi.yaml`/`swagger.json` and wants a quick consistency pass before publishing or generating clients.
+
+Keep the task scoped to what the user asked for, preserve the project's
+existing conventions, and report findings or edits with concrete file:line
+references. Do not perform destructive Git, filesystem, or network
+operations unless the user explicitly requested them. If the matching
+skill (`openapi-validator`) is not installed in this environment, follow the
+workflow described in skills/openapi-validator/SKILL.md.
 </command-instruction>

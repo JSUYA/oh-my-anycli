@@ -1,11 +1,19 @@
 ---
-description: Run clang-tidy or cppcheck on changed C/C++ files only and categorize the results.
+description: "Run clang-tidy or cppcheck on changed C/C++ files only and categorize the results."
 argument_hint: "[target path or check set]"
 allowed_tools: [bash, read, edit]
+routes_to_skill: cpp-static-analysis
 ---
 
 <command-instruction>
-You are running the C++ static analysis workflow. Invoke the `cpp-static-analysis` skill with the user's optional `target` and `checks` arguments.
+Run the `cpp-static-analysis` skill workflow on the user's request.
 
-Prefer clang-tidy over cppcheck when both are installed. Detect `compile_commands.json`; warn if missing. Triage every diagnostic into AUTO-FIXABLE / MANUAL-FIXABLE / IGNORE-CANDIDATE. Apply autofixes only per-file with explicit user approval. Never insert `// NOLINT` to silence warnings. Report findings in English with file:line:column references.
+When to use: User invokes "/cpp-static-analysis", asks to "run clang-tidy", or wants a static-analysis pass before opening a PR.
+
+Keep the task scoped to what the user asked for, preserve the project's
+existing conventions, and report findings or edits with concrete file:line
+references. Do not perform destructive Git, filesystem, or network
+operations unless the user explicitly requested them. If the matching
+skill (`cpp-static-analysis`) is not installed in this environment, follow the
+workflow described in skills/cpp-static-analysis/SKILL.md.
 </command-instruction>

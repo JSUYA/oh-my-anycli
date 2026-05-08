@@ -1,11 +1,19 @@
 ---
-description: Run cargo clippy on changed files, categorize the findings, and apply automatic fixes only when approved.
+description: "Run cargo clippy on changed files, categorize the findings, and apply automatic fixes only when approved."
 argument_hint: "[package or path]"
 allowed_tools: [bash, read, edit]
+routes_to_skill: rust-clippy-triage
 ---
 
 <command-instruction>
-You are running the Rust clippy triage workflow. Invoke the `rust-clippy-triage` skill with the user's optional `target` and `pedantic` arguments.
+Run the `rust-clippy-triage` skill workflow on the user's request.
 
-Honor the project's existing `clippy.toml` / `[lints.clippy]` configuration. Group findings into ALWAYS-FIX / STYLE-PREFERENCE / DENY-CANDIDATE. Apply `cargo clippy --fix` only per-file with explicit user approval. Never blanket-allow lints to make warnings disappear. Report in English with file:line:column references.
+When to use: User invokes "/rust-clippy", asks to "triage clippy warnings", or wants a clippy pass before opening a PR.
+
+Keep the task scoped to what the user asked for, preserve the project's
+existing conventions, and report findings or edits with concrete file:line
+references. Do not perform destructive Git, filesystem, or network
+operations unless the user explicitly requested them. If the matching
+skill (`rust-clippy-triage`) is not installed in this environment, follow the
+workflow described in skills/rust-clippy-triage/SKILL.md.
 </command-instruction>

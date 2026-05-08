@@ -1,11 +1,19 @@
 ---
-description: Convert sync-over-async patterns in changed C# files, such as .Result, .Wait, and .GetAwaiter().GetResult(), to async/await.
+description: "Convert sync-over-async patterns in changed C# files, such as .Result, .Wait, and .GetAwaiter().GetResult(), to async/await."
 argument_hint: "[path or project type (library|aspnetcore|wpf|winforms|console)]"
 allowed_tools: [bash, read, edit]
+routes_to_skill: csharp-async-modernize
 ---
 
 <command-instruction>
-You are running the C# async modernize workflow. Invoke the `csharp-async-modernize` skill with the user's optional `target` and `project_type` arguments.
+Run the `csharp-async-modernize` skill workflow on the user's request.
 
-Detect project type from csproj (Sdk, UseWPF, UseWindowsForms). Apply ConfigureAwait(false) only in library projects; leave default for ASP.NET Core / UI frameworks. Add `Async` suffix and propagate `CancellationToken` where the call chain supports it. Refuse to convert event handlers (would become `async void`) without explicit user warning about exception semantics. Report in English with file:line references.
+When to use: User invokes "/csharp-async", asks to "convert sync to async", or wants to remove sync-over-async patterns before review.
+
+Keep the task scoped to what the user asked for, preserve the project's
+existing conventions, and report findings or edits with concrete file:line
+references. Do not perform destructive Git, filesystem, or network
+operations unless the user explicitly requested them. If the matching
+skill (`csharp-async-modernize`) is not installed in this environment, follow the
+workflow described in skills/csharp-async-modernize/SKILL.md.
 </command-instruction>

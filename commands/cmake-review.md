@@ -1,11 +1,19 @@
 ---
-description: Review CMakeLists.txt against modern CMake practices and report prioritized findings.
+description: "Review CMakeLists.txt against modern CMake practices and report prioritized findings."
 argument_hint: "[CMakeLists.txt path or directory]"
 allowed_tools: [bash, read]
+routes_to_skill: cmake-review
 ---
 
 <command-instruction>
-You are running the CMake review workflow. Invoke the `cmake-review` skill with the user's optional `target` argument.
+Run the `cmake-review` skill workflow on the user's request.
 
-Read the `cmake_minimum_required` value first; do not recommend bumping it without warning the user about policy changes. Apply the checklist (target_-prefixed commands, file(GLOB), policies, find_package vs FetchContent, install rules, CTest gating). Output findings only — never edit CMakeLists.txt. Report in English with file:line references and HIGH/MEDIUM/LOW severity tags.
+When to use: User invokes "/cmake-review", asks to "review the CMake build", or wants a sanity check on a new CMakeLists.txt before merging.
+
+Keep the task scoped to what the user asked for, preserve the project's
+existing conventions, and report findings or edits with concrete file:line
+references. Do not perform destructive Git, filesystem, or network
+operations unless the user explicitly requested them. If the matching
+skill (`cmake-review`) is not installed in this environment, follow the
+workflow described in skills/cmake-review/SKILL.md.
 </command-instruction>

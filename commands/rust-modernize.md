@@ -1,11 +1,19 @@
 ---
-description: Modernize changed Rust files from older patterns to current idioms such as try! to ?, manual loops to iterators, and clearer error handling.
+description: "Modernize changed Rust files from older patterns to current idioms such as try! to ?, manual loops to iterators, and clearer error handling."
 argument_hint: "[path or error pattern (anyhow|thiserror|eyre|std)]"
 allowed_tools: [bash, read, edit]
+routes_to_skill: rust-idiom-modernize
 ---
 
 <command-instruction>
-You are running the Rust idiom modernize workflow. Invoke the `rust-idiom-modernize` skill with the user's optional `target` and `error_pattern` arguments.
+Run the `rust-idiom-modernize` skill workflow on the user's request.
 
-Detect the project's edition and existing error-handling pattern from Cargo.toml and source. Apply changes per-file with explicit approval. Never introduce new dependencies (anyhow, thiserror, etc.) without flagging them as a separate proposal. Never change public API return types without flagging the API break. Report in English with file:line references grouped by category (Operator / Iterator / Error / Micro).
+When to use: User invokes "/rust-modernize", asks to "modernize this Rust code", or wants idiom cleanup before review.
+
+Keep the task scoped to what the user asked for, preserve the project's
+existing conventions, and report findings or edits with concrete file:line
+references. Do not perform destructive Git, filesystem, or network
+operations unless the user explicitly requested them. If the matching
+skill (`rust-idiom-modernize`) is not installed in this environment, follow the
+workflow described in skills/rust-idiom-modernize/SKILL.md.
 </command-instruction>

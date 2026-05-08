@@ -1,11 +1,19 @@
 ---
-description: Enable nullable reference types for a C# project and categorize the resulting CS86xx warnings.
+description: "Enable nullable reference types for a C# project and categorize the resulting CS86xx warnings."
 argument_hint: "[csproj path or scope (file|project|solution)]"
 allowed_tools: [bash, read, edit]
+routes_to_skill: csharp-nullable-migrate
 ---
 
 <command-instruction>
-You are running the C# nullable migrate workflow. Invoke the `csharp-nullable-migrate` skill with the user's optional `target` and `scope` arguments.
+Run the `csharp-nullable-migrate` skill workflow on the user's request.
 
-Default `scope` is `project`; never apply `solution` scope without explicit confirmation. Triage every CS86xx warning into TRUE-POSITIVE / GUARD-NEEDED / API-BOUNDARY / EF-CORE-NAVIGATION. Refuse to insert `!` (null-forgiving operator) anywhere except the documented EF Core `= null!;` initializer pattern, and only after recognizing the entity context. Report in English with file:line references.
+When to use: User invokes "/csharp-nullable", asks to "enable NRT", or wants to migrate a project to nullable annotations safely.
+
+Keep the task scoped to what the user asked for, preserve the project's
+existing conventions, and report findings or edits with concrete file:line
+references. Do not perform destructive Git, filesystem, or network
+operations unless the user explicitly requested them. If the matching
+skill (`csharp-nullable-migrate`) is not installed in this environment, follow the
+workflow described in skills/csharp-nullable-migrate/SKILL.md.
 </command-instruction>

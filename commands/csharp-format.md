@@ -1,11 +1,19 @@
 ---
-description: Apply style fixes with dotnet format and categorize Roslyn analyzer warnings as STYLE, CORRECTNESS, PERFORMANCE, or DESIGN.
+description: "Apply style fixes with dotnet format and categorize Roslyn analyzer warnings as STYLE, CORRECTNESS, PERFORMANCE, or DESIGN."
 argument_hint: "[csproj path or severity_floor]"
 allowed_tools: [bash, read, edit]
+routes_to_skill: csharp-analyzer-fix
 ---
 
 <command-instruction>
-You are running the C# analyzer fix workflow. Invoke the `csharp-analyzer-fix` skill with the user's optional `target` and `severity_floor` arguments.
+Run the `csharp-analyzer-fix` skill workflow on the user's request.
 
-Run `dotnet format whitespace` and `dotnet format style` automatically; require explicit approval before `dotnet format analyzers`. Triage every Roslyn / StyleCop / Roslynator diagnostic into STYLE / CORRECTNESS / PERFORMANCE / DESIGN. Apply only STYLE automatically; prompt per-occurrence for CA1822, CA2007, CA1062, and other behavior-affecting fixes. Never edit `.editorconfig` to silence diagnostics. Report in English with file:line references.
+When to use: User invokes "/csharp-format", asks to "run dotnet format", or wants Roslyn analyzer triage before opening a PR.
+
+Keep the task scoped to what the user asked for, preserve the project's
+existing conventions, and report findings or edits with concrete file:line
+references. Do not perform destructive Git, filesystem, or network
+operations unless the user explicitly requested them. If the matching
+skill (`csharp-analyzer-fix`) is not installed in this environment, follow the
+workflow described in skills/csharp-analyzer-fix/SKILL.md.
 </command-instruction>
