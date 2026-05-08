@@ -1,0 +1,58 @@
+# Sample GitHub Actions workflow that runs the Oh-My-AnyCLI test suite.
+# Copy to .github/workflows/ci.yml to enable. The on: triggers, branch list,
+# and runner image can all be tightened to your team's preference.
+#
+# What this workflow does:
+#   - Runs every script under tests/ on Ubuntu (push + PR).
+#   - On macOS, runs the cheap lint subset only — full e2e occasionally hits
+#     network/DNS quirks on hosted runners and we don't want flaky CI.
+#
+# This file is named *.sample so it does NOT auto-activate just by being in
+# the repo. CI is opt-in.
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ubuntu-full:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show environment
+        run: |
+          uname -a
+          bash --version | head -1
+          git --version
+
+      - name: Make tests executable
+        run: chmod +x tests/*.sh
+
+      - name: Run full test suite
+        run: ./tests/run-all.sh --keep
+
+  macos-lint-only:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Make tests executable
+        run: chmod +x tests/*.sh
+
+      # bash 3.2 ships on macOS by default. The `local -n` namerefs are not
+      # used (install.sh switched to exit-code returns); but if your fork
+      # adds bash-4-only syntax, prefer installing newer bash here:
+      #   - run: brew install bash
+      - name: Run lint subset
+        run: |
+          ./tests/lint-skills.sh
+          ./tests/lint-commands.sh
+          ./tests/lint-agents.sh
+          ./tests/lint-plugins.sh
+          ./tests/matrix-artifacts.sh
+          ./tests/unit-frontmatter.sh

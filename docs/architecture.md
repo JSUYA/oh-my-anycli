@@ -15,7 +15,7 @@ Oh-My-AnyCLI is a markdown-first artifact collection for OpenCode-AnyCLI. It has
 | `update.sh` | Runs `git pull --ff-only` and reapplies installed artifacts. |
 | `uninstall.sh` | Removes only manifest-tracked installed files. |
 | `omac` | Helper CLI for list/search/info/plugin/update/doctor commands. |
-| `tests/` | Shell lint and installation verification scripts. |
+| `tests/` | Lint, unit, and end-to-end test suite — see `tests/run-all.sh`. |
 
 ## Installation model
 
