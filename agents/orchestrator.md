@@ -1,7 +1,7 @@
 ---
 name: orchestrator
-description: Specialist subagent that plans and routes multi-step coding tasks across the existing roster of subagents. Read-only coordinator; never edits files itself.
-mode: subagent
+description: Coordinator that plans and routes multi-step coding tasks across the existing roster of subagents. Read-only; never edits files itself. Available as a primary agent so it can be selected from the agent picker alongside build/plan.
+mode: all
 model: cline/default
 tools:
   bash: true
