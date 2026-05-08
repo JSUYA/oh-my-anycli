@@ -35,7 +35,9 @@ Commands:
   omac plugin list                list plugins
   omac plugin add <git-url>       add plugin
   omac plugin remove <name>       remove plugin
-  omac update [--prune]           git pull && reapply
+  omac update [--prune] [--no-stash]
+                                  auto-stash dirty tree, git pull && reapply,
+                                  then pop stash. --no-stash aborts on dirty.
   omac reapply                    install.sh --reapply
   omac doctor                     run installation diagnostics
   omac version                    print version

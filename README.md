@@ -94,9 +94,16 @@ To pull the latest skills/commands/agents from this repo and reapply them
 to your `~/.config/opencode-anycli/opencode/` directory:
 
 ```bash
-omac update           # equivalent to: cd ~/.oh-my-anycli && git pull --ff-only && ./install.sh --reapply
-omac update --prune   # also remove artifacts that no longer exist upstream
+omac update              # auto-stash dirty tree → git pull --ff-only → reapply → pop
+omac update --prune      # also remove artifacts that no longer exist upstream
+omac update --no-stash   # skip auto-stash; abort if working tree is dirty
 ```
+
+If `~/.oh-my-anycli` has uncommitted changes (tracked or untracked), `omac
+update` will `git stash --include-untracked` them before pulling and
+restore them after a successful reapply. If pull/install fails, the stash
+is still popped so your tree is left as you had it. If the pop itself
+conflicts, the stash is kept in `git stash list` for manual resolution.
 
 To update the parent `opencode-anycli` wrapper (binary, provider, default
 config), use its own update command:
