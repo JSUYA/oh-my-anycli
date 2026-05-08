@@ -115,21 +115,21 @@ trap 'rm -f "$new_manifest"' EXIT
 record() { printf "%s\n" "$1" >> "$new_manifest"; }
 
 install_one() {
-  # install_one <src> <dst> <counter-copied-var> <counter-skipped-var>
+  # install_one <src> <dst>
   #
-  # SECURITY NOTE: $cv and $sv are passed by the (in-this-file) caller as
-  # variable NAMES so we use indirect assignment via eval. All call sites
-  # supply HARDCODED identifiers (copied_skills, skipped_skills, etc. — see
-  # the loops below). NEVER pass a user-controlled string as $3 or $4 — that
-  # would be a shell-injection vector. The bash 4.3 `local -n` namespace ref
-  # would be safer but macOS ships bash 3.2 so we keep eval for portability.
-  local src="$1" dst="$2" cv="$3" sv="$4"
-  if omac_copy_file "$src" "$dst" "$force"; then
-    eval "$cv=\$(( \${$cv} + 1 ))"
-  else
-    eval "$sv=\$(( \${$sv} + 1 ))"
-  fi
+  # Returns:
+  #   0 — file was copied OR was already identical (counts as "copied").
+  #   1 — destination existed with different content, was kept (counts as
+  #       "skipped"). Use --force / --reapply to overwrite.
+  #   2 — source missing or copy failed. Caller decides whether to abort.
+  #
+  # The caller must increment its own counters at the call site based on this
+  # exit code. Pre-0.4 versions used eval-based indirect variable assignment;
+  # the explicit return code keeps the function pure-data-flow and removes the
+  # shell-injection footgun.
+  local src="$1" dst="$2"
   record "$dst"
+  omac_copy_file "$src" "$dst" "$force"
 }
 
 # 4. skills/
@@ -141,7 +141,11 @@ if [ -d "$INSTALL_DIR/skills" ]; then
     src="$skill_dir/SKILL.md"
     [ -f "$src" ] || { omac_log_warn "Skill '$name' has no SKILL.md; skipping."; continue; }
     dst="$TARGET_DIR/skills/$name/SKILL.md"
-    install_one "$src" "$dst" copied_skills skipped_skills
+    if install_one "$src" "$dst"; then
+      copied_skills=$(( copied_skills + 1 ))
+    else
+      skipped_skills=$(( skipped_skills + 1 ))
+    fi
   done
 fi
 
@@ -152,7 +156,11 @@ if [ -d "$INSTALL_DIR/commands" ]; then
     [ -f "$cmd" ] || continue
     name="$(basename "$cmd")"
     dst="$TARGET_DIR/commands/$name"
-    install_one "$cmd" "$dst" copied_commands skipped_commands
+    if install_one "$cmd" "$dst"; then
+      copied_commands=$(( copied_commands + 1 ))
+    else
+      skipped_commands=$(( skipped_commands + 1 ))
+    fi
   done
 fi
 
@@ -169,7 +177,11 @@ if [ -d "$INSTALL_DIR/agents" ]; then
       continue
     fi
     dst="$TARGET_DIR/agents/$name"
-    install_one "$agent" "$dst" copied_agents skipped_agents
+    if install_one "$agent" "$dst"; then
+      copied_agents=$(( copied_agents + 1 ))
+    else
+      skipped_agents=$(( skipped_agents + 1 ))
+    fi
   done
 fi
 
@@ -193,7 +205,11 @@ if [ -d "$INSTALL_DIR/plugins" ]; then
         src="$sd/SKILL.md"
         [ -f "$src" ] || continue
         dst="$TARGET_DIR/skills/${plugin_name}__${sname}/SKILL.md"
-        install_one "$src" "$dst" copied_skills skipped_skills
+        if install_one "$src" "$dst"; then
+          copied_skills=$(( copied_skills + 1 ))
+        else
+          skipped_skills=$(( skipped_skills + 1 ))
+        fi
       done
     fi
     if [ -d "$plugin_dir/commands" ]; then
@@ -201,7 +217,11 @@ if [ -d "$INSTALL_DIR/plugins" ]; then
         [ -f "$cmd" ] || continue
         cname="$(basename "$cmd" .md)"
         dst="$TARGET_DIR/commands/${plugin_name}__${cname}.md"
-        install_one "$cmd" "$dst" copied_commands skipped_commands
+        if install_one "$cmd" "$dst"; then
+          copied_commands=$(( copied_commands + 1 ))
+        else
+          skipped_commands=$(( skipped_commands + 1 ))
+        fi
       done
     fi
     if [ -d "$plugin_dir/agents" ]; then
@@ -221,7 +241,11 @@ if [ -d "$INSTALL_DIR/plugins" ]; then
           continue
         fi
         dst="$TARGET_DIR/agents/${plugin_name}__${aname}.md"
-        install_one "$agent" "$dst" copied_agents skipped_agents
+        if install_one "$agent" "$dst"; then
+          copied_agents=$(( copied_agents + 1 ))
+        else
+          skipped_agents=$(( skipped_agents + 1 ))
+        fi
       done
     fi
   done

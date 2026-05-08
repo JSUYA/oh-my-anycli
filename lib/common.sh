@@ -68,8 +68,16 @@ omac_copy_file() {
 }
 
 # Minimal YAML frontmatter parser. Walks lines between leading '---' and the
-# matching closing '---', parses simple "key: value" lines (no nesting, no
-# multiline values). Prints "key=value" pairs, one per line.
+# matching closing '---', parses simple "key: value" lines on the top level
+# only. Prints "key=value" pairs, one per line.
+#
+# Limitations (intentional — keeps the parser ~30 lines of awk):
+#   - nested object children are skipped (any line with leading whitespace).
+#   - block list items (`- foo`) are skipped.
+#   - multi-line scalars (`|`, `>`) are not unwrapped.
+#
+# For multi-line keys (e.g. `inputs:` lists, `tools:` objects) use
+# omac_frontmatter_block_get instead — it returns the raw block as-is.
 #
 # Usage: omac_parse_frontmatter <file>
 omac_parse_frontmatter() {
@@ -85,7 +93,9 @@ omac_parse_frontmatter() {
       if ($0 ~ /^[[:space:]]*-/) next
       if ($0 ~ /^[[:space:]]*$/) next
       if ($0 ~ /^[[:space:]]*#/) next
-      # Match "key: value" at top level (no leading whitespace).
+      # Skip indented (nested) keys — top-level only.
+      if ($0 ~ /^[[:space:]]+/) next
+      # Match "key: value" at top level.
       if (match($0, /^[A-Za-z_][A-Za-z0-9_-]*:[[:space:]]*/)) {
         key = substr($0, 1, index($0, ":") - 1)
         value = substr($0, index($0, ":") + 1)
@@ -101,9 +111,59 @@ omac_parse_frontmatter() {
 }
 
 # Get a single frontmatter value. Args: file key
+# Returns only the first matching top-level scalar value, even if duplicate
+# keys exist (matches YAML's "last wins" loosely — we pick "first wins" for
+# determinism in the face of malformed frontmatter).
 omac_frontmatter_get() {
   local file="$1" key="$2"
   omac_parse_frontmatter "$file" | awk -F= -v k="$key" '$1 == k { sub(/^[^=]*=/, ""); print; exit }'
+}
+
+# Get the raw block of frontmatter lines belonging to a top-level key.
+# Includes the key's own line and every subsequent indented (or list-item)
+# line until the next top-level key or the end of the frontmatter.
+#
+# Use this for multi-line values such as `tools:` (object form) or `inputs:`
+# (list form) that omac_parse_frontmatter intentionally drops.
+#
+# Usage: omac_frontmatter_block_get <file> <key>
+# Output: zero or more lines (empty if key absent).
+omac_frontmatter_block_get() {
+  local file="$1" key="$2"
+  awk -v want="$key" '
+    BEGIN { in_fm = 0; printing = 0 }
+    NR == 1 {
+      if ($0 == "---") { in_fm = 1; next } else { exit 0 }
+    }
+    in_fm && /^---[[:space:]]*$/ { exit 0 }
+    !in_fm { exit 0 }
+    {
+      # Top-level key line: starts with non-whitespace and contains ":".
+      if ($0 ~ /^[A-Za-z_][A-Za-z0-9_-]*:/) {
+        cur = substr($0, 1, index($0, ":") - 1)
+        if (cur == want) { printing = 1; print; next }
+        if (printing) { exit 0 }
+        next
+      }
+      if (printing) print
+    }
+  ' "$file"
+}
+
+# True (exit 0) if the named top-level key is present in the frontmatter
+# AND its block contains any indented child line. Useful for detecting
+# whether a key uses the multi-line form.
+#
+# Usage: omac_frontmatter_block_has_children <file> <key>
+omac_frontmatter_block_has_children() {
+  local file="$1" key="$2" block
+  block="$(omac_frontmatter_block_get "$file" "$key")"
+  printf "%s\n" "$block" | awk '
+    NR == 1 { next }                       # the key line itself
+    /^[[:space:]]+[^[:space:]]/ { found=1; exit }
+    /^[[:space:]]*-[[:space:]]+/ { found=1; exit }
+    END { exit !found }
+  '
 }
 
 # Validate that a frontmatter block contains all listed required keys.
