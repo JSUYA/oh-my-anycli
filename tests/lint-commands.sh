@@ -20,6 +20,10 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 . "$ROOT_DIR/lib/common.sh"
 
 target_dir="${1:-$ROOT_DIR/commands}"
+require_handoff_policy=0
+if [ "$target_dir" = "$ROOT_DIR/commands" ]; then
+  require_handoff_policy=1
+fi
 
 if [ ! -d "$target_dir" ]; then
   omac_die "commands directory not found: $target_dir"
@@ -27,6 +31,7 @@ fi
 
 failures=0
 checked=0
+valid_handoff_policies=" diff-review debug-diagnose test-writing release-git doc-explain "
 
 while IFS= read -r -d '' cmd; do
   checked=$(( checked + 1 ))
@@ -51,6 +56,23 @@ while IFS= read -r -d '' cmd; do
     omac_log_check fail "$rel - body is too short"
     failures=$(( failures + 1 ))
     continue
+  fi
+
+  if [ "$require_handoff_policy" -eq 1 ]; then
+    policy_id="$(sed -n 's/.*<handoff-context-policy id="\([^"]*\)".*/\1/p' "$cmd" | head -n 1)"
+    if [ -z "$policy_id" ]; then
+      omac_log_check fail "$rel - missing <handoff-context-policy id=\"...\"> block"
+      failures=$(( failures + 1 ))
+      continue
+    fi
+    case "$valid_handoff_policies" in
+      *" $policy_id "*) ;;
+      *)
+        omac_log_check fail "$rel - unknown handoff-context-policy id: $policy_id"
+        failures=$(( failures + 1 ))
+        continue
+        ;;
+    esac
   fi
 
   omac_log_check ok "$rel"

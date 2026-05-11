@@ -17,3 +17,9 @@ operations unless the user explicitly requested them. If the matching
 skill (`git-commit-helper`) is not installed in this environment, follow the
 workflow described in skills/git-commit-helper/SKILL.md.
 </command-instruction>
+
+<handoff-context-policy id="release-git">
+keep: latest_user, command_instruction, git_status, staged_diff, commit_log, changed_files
+summarize: full_diff, successful_tool_output, prior_assistant
+drop: unrelated_history, stale_tool_results
+</handoff-context-policy>

@@ -17,3 +17,9 @@ operations unless the user explicitly requested them. If the matching
 skill (`test-coverage-reporter`) is not installed in this environment, follow the
 workflow described in skills/test-coverage-reporter/SKILL.md.
 </command-instruction>
+
+<handoff-context-policy id="test-writing">
+keep: latest_user, command_instruction, target_file, existing_tests, test_failures, coverage_summary
+summarize: bash, grep, read, prior_assistant
+drop: unrelated_history, stale_tool_results
+</handoff-context-policy>

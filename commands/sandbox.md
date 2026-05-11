@@ -17,3 +17,9 @@ operations unless the user explicitly requested them. If the matching
 skill (`sandboxed-browser-testing`) is not installed in this environment, follow the
 workflow described in skills/sandboxed-browser-testing/SKILL.md.
 </command-instruction>
+
+<handoff-context-policy id="debug-diagnose">
+keep: latest_user, command_instruction, error_text, stack_trace, failing_command, relevant_files
+summarize: successful_tool_output, repeated_logs, prior_assistant
+drop: unrelated_history, stale_tool_results
+</handoff-context-policy>

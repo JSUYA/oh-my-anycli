@@ -17,3 +17,9 @@ operations unless the user explicitly requested them. If the matching
 skill (`auto-approve`) is not installed in this environment, follow the
 workflow described in skills/auto-approve/SKILL.md.
 </command-instruction>
+
+<handoff-context-policy id="doc-explain">
+keep: latest_user, command_instruction, requested_files, read_results, identifiers
+summarize: bash, search_results, prior_assistant
+drop: unrelated_history, stale_tool_results
+</handoff-context-policy>

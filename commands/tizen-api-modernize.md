@@ -17,3 +17,9 @@ operations unless the user explicitly requested them. If the matching
 skill (`tizen-api-modernize`) is not installed in this environment, follow the
 workflow described in skills/tizen-api-modernize/SKILL.md.
 </command-instruction>
+
+<handoff-context-policy id="diff-review">
+keep: latest_user, command_instruction, changed_files, diffs, nearby_code, failing_checks
+summarize: bash, grep, read, prior_assistant
+drop: unrelated_history, stale_tool_results
+</handoff-context-policy>
