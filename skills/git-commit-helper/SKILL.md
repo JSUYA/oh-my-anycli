@@ -13,23 +13,55 @@ required_tools: [bash, read]
 
 ## Goal
 
-Prepare a focused Git commit with an appropriate message.
+Prepare a focused commit plan and message from staged changes while honoring
+project commit rules.
+
+## Boundary
+
+Use this skill only for staged-change commit readiness and commit messages. Use
+`branch-prep` for branch state, lint/test readiness, rebase, or push decisions.
+Use `pr-description-writer` for PR body text after commits exist.
 
 ## Workflow
 
-1. Read the user's request and identify the target files or project area.
-2. Gather only the local context needed for the task.
-3. Apply the skill's domain checklist with scoped, evidence-backed reasoning.
-4. Report findings, edits, or recommendations in English.
-5. Include verification steps or residual risks when relevant.
+1. Inspect repository rules first: `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING*`,
+   `.gitmessage`, and recent commits.
+2. Inspect staged changes:
+   ```bash
+   git status --short
+   git diff --cached --stat
+   git diff --cached --name-only
+   git diff --cached
+   ```
+3. If nothing is staged, do not invent a commit. Report what is modified and
+   ask whether to stage files.
+4. Check commit scope:
+   - staged files should share one intent;
+   - generated files should be intentional;
+   - secrets, local config, and unrelated churn should not be staged.
+5. Draft a concise message. Prefer the existing project style; otherwise use a
+   conventional form like `type(scope): summary`.
+6. If the user asked to create the commit, use the project-required author and
+   committer identities, and never add URLs or co-author trailers.
 
-## Output
+## Output Format
 
-Use concise English. Preserve code identifiers, file paths, command names, and API names exactly as they appear in the project.
+```markdown
+### Commit readiness
+- staged files: <n>
+- intent: <one sentence>
+- risk: <tests or missing checks>
+
+Suggested message:
+`fix(install): keep manifest pruning portable on macOS`
+
+Command:
+`GIT_COMMITTER_NAME="JunsuChoi" GIT_COMMITTER_EMAIL="jsuya.choi@samsung.com" git commit --author="JunsuChoi <jsuya.choi@samsung.com>" -m "..."`
+```
 
 ## Guardrails
 
-- Do not invent facts, test results, issue links, or external references.
-- Do not make unrelated edits.
-- Do not perform destructive actions without explicit user approval.
-- Keep examples generic and free of sensitive or organization-specific data.
+- Do not commit unstaged files unless the user explicitly asked to stage them.
+- Do not include issue, PR, or external URLs in commit messages.
+- Do not add `Co-authored-by:` trailers.
+- Do not claim tests were run unless they were.

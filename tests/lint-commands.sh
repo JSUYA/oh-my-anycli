@@ -6,7 +6,7 @@
 #   ./tests/lint-commands.sh           # walks ./commands/
 #   ./tests/lint-commands.sh <dir>     # walks the given directory's *.md
 #
-# Exits 0 if all command md files have a `description` key, 1 otherwise.
+# Exits 0 if all command md files have the required authoring contract keys, 1 otherwise.
 #
 set -euo pipefail
 
@@ -32,8 +32,8 @@ while IFS= read -r -d '' cmd; do
   checked=$(( checked + 1 ))
   rel="${cmd#"$ROOT_DIR/"}"
 
-  if ! omac_frontmatter_require "$cmd" description >/dev/null 2>&1; then
-    omac_log_check fail "$rel - missing required frontmatter: description"
+  if ! omac_frontmatter_require "$cmd" description argument_hint allowed_tools >/dev/null 2>&1; then
+    omac_log_check fail "$rel - missing required frontmatter: description, argument_hint, allowed_tools"
     failures=$(( failures + 1 ))
     continue
   fi

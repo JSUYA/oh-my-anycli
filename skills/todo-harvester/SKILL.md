@@ -15,23 +15,44 @@ required_tools: [bash, read, grep]
 
 ## Goal
 
-Collect TODO comments and classify follow-up work.
+Collect TODO-like comments, classify urgency, and prioritize follow-up work
+without editing source files.
 
 ## Workflow
 
-1. Read the user's request and identify the target files or project area.
-2. Gather only the local context needed for the task.
-3. Apply the skill's domain checklist with scoped, evidence-backed reasoning.
-4. Report findings, edits, or recommendations in English.
-5. Include verification steps or residual risks when relevant.
+1. Resolve scope from the user or default to the repo. Honor `.gitignore` when
+   using `git grep`; skip generated/vendor/build directories.
+2. Search for `TODO`, `FIXME`, `HACK`, `XXX`, `NOTE`, and project-specific
+   markers.
+3. Capture file, line, marker, owner if present, and surrounding one-line
+   context.
+4. Use `git blame` when available to estimate age and author. If the repo has
+   no history, omit age rather than guessing.
+5. Rank:
+   - HIGH: `FIXME`, `HACK`, security/data-loss wording, release blockers;
+   - MEDIUM: `TODO` with no owner or older than the requested age threshold;
+   - LOW: `NOTE`, documentation reminders, owned near-term tasks.
+6. Group duplicates that refer to the same underlying work.
 
-## Output
+## Output Format
 
-Use concise English. Preserve code identifiers, file paths, command names, and API names exactly as they appear in the project.
+```markdown
+### TODO harvest
+Scope: `src/`
+
+#### HIGH
+- `src/auth.ts:42`: FIXME: token refresh race. age: 184 days.
+
+#### MEDIUM
+- `src/report.ts:88`: TODO: paginate exports. owner: none.
+
+#### Summary
+- high: 1, medium: 3, low: 5
+```
 
 ## Guardrails
 
-- Do not invent facts, test results, issue links, or external references.
-- Do not make unrelated edits.
-- Do not perform destructive actions without explicit user approval.
-- Keep examples generic and free of sensitive or organization-specific data.
+- Do not delete comments from this skill.
+- Do not expose full blame author emails if unnecessary; names or commit age are
+  usually enough.
+- Do not treat every TODO as urgent; rank by marker, age, and risk language.

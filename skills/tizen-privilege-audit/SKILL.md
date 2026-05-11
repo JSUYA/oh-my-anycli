@@ -19,6 +19,12 @@ Compare the privileges declared in `tizen-manifest.xml` against API calls actual
 
 The skill never edits the manifest; it produces a report. Privilege removal in particular is reserved for explicit user decision (libraries and reflection paths can require privileges invisibly).
 
+## Boundary
+
+Use this skill only for privilege-to-source usage matching. Use
+`tizen-manifest-review` for package/profile/application/category metadata and
+`tizen-api-modernize` for deprecated API replacement plans.
+
 ## Inputs
 
 - `target`: project root (default).

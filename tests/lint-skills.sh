@@ -6,7 +6,7 @@
 #   ./tests/lint-skills.sh            # walks ./skills/
 #   ./tests/lint-skills.sh <dir>      # walks the given directory's *.md tree
 #
-# Exits 0 if all SKILL.md files have `name` and `description` keys, 1 otherwise.
+# Exits 0 if all SKILL.md files have the required authoring contract keys, 1 otherwise.
 #
 set -euo pipefail
 
@@ -31,8 +31,8 @@ checked=0
 while IFS= read -r -d '' skill; do
   checked=$(( checked + 1 ))
   rel="${skill#"$ROOT_DIR/"}"
-  if ! omac_frontmatter_require "$skill" name description >/dev/null 2>&1; then
-    omac_log_check fail "$rel - missing required frontmatter: name and description"
+  if ! omac_frontmatter_require "$skill" name description version when_to_use required_tools >/dev/null 2>&1; then
+    omac_log_check fail "$rel - missing required frontmatter: name, description, version, when_to_use, required_tools"
     failures=$(( failures + 1 ))
     continue
   fi

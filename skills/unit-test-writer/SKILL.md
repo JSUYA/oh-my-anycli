@@ -6,30 +6,55 @@ when_to_use: User asks "/test path/to/file.ts", "write tests for X", or wants te
 inputs:
   - name: target
     description: Path to the source file (or function-qualified path like "src/util.ts:formatDate") to be tested.
-required_tools: [bash, read]
+required_tools: [bash, read, edit]
 ---
 
 # Unit Test Writer Skill
 
 ## Goal
 
-Create unit tests for the requested code.
+Create focused unit tests for the requested code using the project's existing
+test framework and style.
+
+## Boundary
+
+Use this skill for isolated functions, classes, and modules with collaborators
+mocked or faked according to local style. Use `integration-test-writer` when the
+behavior must cross HTTP, DB, queue, CLI, filesystem, or service boundaries. Use
+`test-coverage-reporter` when the user asks what is covered rather than asking
+to write tests.
 
 ## Workflow
 
-1. Read the user's request and identify the target files or project area.
-2. Gather only the local context needed for the task.
-3. Apply the skill's domain checklist with scoped, evidence-backed reasoning.
-4. Report findings, edits, or recommendations in English.
-5. Include verification steps or residual risks when relevant.
+1. Resolve the target source file and optional function/symbol.
+2. Detect the existing test framework and nearest test location. Read 1-2
+   neighboring tests before writing anything.
+3. Choose behavior-oriented tests:
+   - the primary happy path;
+   - one realistic edge case;
+   - one error path if the contract includes errors.
+4. Avoid tests that only assert implementation shape or duplicate every branch.
+5. Write the smallest new test file or append to the closest existing one.
+6. Run the narrowest test command. If it fails because the code is buggy, stop
+   and report the code issue instead of weakening the test.
 
-## Output
+## Output Format
 
-Use concise English. Preserve code identifiers, file paths, command names, and API names exactly as they appear in the project.
+```markdown
+### Unit tests added
+- `src/__tests__/formatDate.test.ts`
+
+### Command
+- `npm test -- formatDate.test.ts`: 4 passed
+
+### Not covered
+- timezone database edge cases
+```
 
 ## Guardrails
 
-- Do not invent facts, test results, issue links, or external references.
-- Do not make unrelated edits.
-- Do not perform destructive actions without explicit user approval.
-- Keep examples generic and free of sensitive or organization-specific data.
+- Do not introduce a new test runner or assertion library.
+- Do not mock the function under test.
+- Do not weaken or delete existing tests.
+- Do not use snapshots for logic-heavy behavior unless the project already does
+  so for that exact kind of output.

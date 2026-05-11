@@ -13,23 +13,52 @@ required_tools: [bash, read, grep]
 
 ## Goal
 
-Run a local security scan for secrets and risky code patterns.
+Run a local-only security sweep for hardcoded secrets, risky code patterns, and
+suspicious dependency names.
 
 ## Workflow
 
-1. Read the user's request and identify the target files or project area.
-2. Gather only the local context needed for the task.
-3. Apply the skill's domain checklist with scoped, evidence-backed reasoning.
-4. Report findings, edits, or recommendations in English.
-5. Include verification steps or residual risks when relevant.
+1. Resolve scope from the user or default to the current repository. Prefer the
+   staged diff or branch diff for pre-push checks.
+2. Run local pattern searches only. Useful baseline patterns:
+   - secrets: `AKIA[0-9A-Z]{16}`, `github_pat_`, `ghp_`, `glpat-`, private key
+     headers, JWT-shaped strings, `password|secret|token|api_key` assignments;
+   - unsafe execution: `eval`, `exec`, `Function(`, `child_process.exec`,
+     `shell=True`, `pickle.loads`, unsafe `yaml.load`;
+   - injection patterns: SQL string concatenation, shell command interpolation,
+     path joins with unchecked user input;
+   - weak crypto: MD5, SHA1, DES, ECB, hard-coded IVs;
+   - dependency names that look misspelled or source-routed unexpectedly.
+3. Classify findings:
+   - HIGH: likely real secret or exploitable sink in production path;
+   - MEDIUM: risky pattern needing context;
+   - LOW: suspicious dependency/config or weak signal;
+   - FALSE-POSITIVE: test fixture, sample token, or documented dummy value.
+4. Mask secret values in output. Show enough prefix/type/path to identify the
+   item without copying the full secret.
+5. Recommend remediation steps but do not rotate secrets or rewrite history.
 
-## Output
+## Output Format
 
-Use concise English. Preserve code identifiers, file paths, command names, and API names exactly as they appear in the project.
+```markdown
+### Security scan
+Scope: staged diff
+
+#### HIGH
+- `.env:3`: AWS access key format match `AKIA************`.
+  fix: rotate the key, remove it from history, move to a secret manager.
+
+#### MEDIUM
+- `src/report.py:42`: `subprocess.run(..., shell=True)` with user input.
+  fix: pass an argument list and validate allowed commands.
+
+#### Likely false positives
+- `tests/fixtures/jwt.txt`: fixture token, not a live credential.
+```
 
 ## Guardrails
 
-- Do not invent facts, test results, issue links, or external references.
-- Do not make unrelated edits.
-- Do not perform destructive actions without explicit user approval.
-- Keep examples generic and free of sensitive or organization-specific data.
+- Do not upload code, lockfiles, or suspected secrets to external services.
+- Do not print full secret values.
+- Do not auto-edit files, rotate credentials, or rewrite Git history.
+- Do not invent CVE IDs or vulnerability database results.

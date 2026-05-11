@@ -15,23 +15,47 @@ required_tools: [bash, read, grep]
 
 ## Goal
 
-Diagnose errors from logs, stack traces, and local code context.
+Diagnose an error from literal evidence, produce ranked hypotheses, and identify
+the cheapest falsifying experiment before proposing edits.
 
 ## Workflow
 
-1. Read the user's request and identify the target files or project area.
-2. Gather only the local context needed for the task.
-3. Apply the skill's domain checklist with scoped, evidence-backed reasoning.
-4. Report findings, edits, or recommendations in English.
-5. Include verification steps or residual risks when relevant.
+1. Restate the failure in one sentence using the exact error text, command, and
+   location if known. If the trigger is missing, ask for it or infer only from
+   local logs/tests.
+2. Read the top live stack frame and its immediate caller. For failing tests,
+   read the failing test before implementation files.
+3. Reproduce with the smallest safe command when practical. If reproduction is
+   expensive or destructive, state the command instead of running it.
+4. Produce exactly three ranked hypotheses:
+   - probability;
+   - suspect `file:line`;
+   - one-line fix;
+   - falsifier that should take under two minutes.
+5. Run the cheapest safe falsifier first. Update the ranking based on observed
+   output.
+6. Stop when the root cause is identified or list the precise missing signal
+   needed next.
 
-## Output
+## Output Format
 
-Use concise English. Preserve code identifiers, file paths, command names, and API names exactly as they appear in the project.
+```markdown
+### Failure
+`TypeError: x is undefined` from `npm test -- user.test.ts`.
+
+### Hypotheses
+1. P=0.65 `src/user.ts:42`: `findUser` can return `undefined`.
+   fix: handle missing user before reading `.name`.
+   falsify: add a log/assert around the return value in the failing test.
+
+### Next experiment
+- Run `npm test -- user.test.ts -t "missing user"`; if it fails at the same
+  line, apply the guard.
+```
 
 ## Guardrails
 
-- Do not invent facts, test results, issue links, or external references.
-- Do not make unrelated edits.
-- Do not perform destructive actions without explicit user approval.
-- Keep examples generic and free of sensitive or organization-specific data.
+- Do not edit code unless the user asked for a fix, not just a diagnosis.
+- Do not produce more than three hypotheses to look thorough.
+- Do not invent stack frames, versions, or log output.
+- Do not recommend broad refactors as the first fix.

@@ -6,30 +6,53 @@ when_to_use: User asks "/readme", "draft a README", or starts a new project that
 inputs:
   - name: scope
     description: Optional path to scope the inference to (e.g., a sub-package directory). Defaults to the project root.
-required_tools: [bash, read]
+required_tools: [bash, read, edit]
 ---
 
 # Readme Bootstrap Skill
 
 ## Goal
 
-Draft a README from project structure.
+Draft an initial README from project structure without overwriting an existing
+README.
 
 ## Workflow
 
-1. Read the user's request and identify the target files or project area.
-2. Gather only the local context needed for the task.
-3. Apply the skill's domain checklist with scoped, evidence-backed reasoning.
-4. Report findings, edits, or recommendations in English.
-5. Include verification steps or residual risks when relevant.
+1. Resolve scope and inspect only top-level project evidence first:
+   manifest files, package metadata, entrypoints, docs, examples, tests, and CI.
+2. If a README already exists, write `README.draft.md` unless the user
+   explicitly asks to edit the existing README.
+3. Infer purpose cautiously from real metadata: package description, module
+   names, CLI help, comments, tests, or examples. If purpose is unclear, state
+   that and keep the README generic.
+4. Include sections that match the project:
+   - Overview;
+   - Requirements;
+   - Installation;
+   - Usage;
+   - Development;
+   - Testing;
+   - Configuration or Environment, only if detected;
+   - License, only if a license file exists.
+5. Verify commands before including their output when safe. If not run, mark
+   commands as unverified.
+6. Keep placeholders out of the final draft unless the user asked for a template.
 
-## Output
+## Output Format
 
-Use concise English. Preserve code identifiers, file paths, command names, and API names exactly as they appear in the project.
+```markdown
+### README draft
+- wrote: `README.draft.md`
+- inferred entrypoint: `bin/mycli`
+- unverified commands: `npm publish`
+
+### Verification
+- `npm test`: not run: no dependencies installed
+```
 
 ## Guardrails
 
-- Do not invent facts, test results, issue links, or external references.
-- Do not make unrelated edits.
-- Do not perform destructive actions without explicit user approval.
-- Keep examples generic and free of sensitive or organization-specific data.
+- Do not overwrite an existing README unless explicitly asked.
+- Do not invent install commands, environment variables, screenshots, badges, or
+  support channels.
+- Do not document future behavior that is not present in the repository.

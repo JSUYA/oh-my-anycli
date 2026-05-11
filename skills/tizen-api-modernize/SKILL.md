@@ -17,6 +17,12 @@ required_tools: [bash, read]
 
 Scan touched Tizen native source files for use of APIs that are deprecated as of the project's target Tizen API version. For each finding, report the deprecated function, the recommended replacement, the required header(s), and migration notes (signature changes, error-handling differences). The skill never edits source automatically; it produces a per-file migration plan.
 
+## Boundary
+
+Use this skill for deprecated native API usage in source. Use
+`tizen-manifest-review` for manifest correctness and `tizen-privilege-audit` for
+privilege declarations versus actual API calls.
+
 ## Inputs
 
 - `target`: file/directory; default is changed `.c`/`.cpp`/`.h`/`.hpp` files on the branch.

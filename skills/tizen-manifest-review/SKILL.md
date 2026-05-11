@@ -15,6 +15,14 @@ required_tools: [bash, read]
 
 Read `tizen-manifest.xml` and report findings against a checklist covering: API/profile compatibility, application type choice, package identifier format, privileges sanity, features/categories/metadata, and signing prerequisites. The skill never edits the manifest; it only reports.
 
+## Boundary
+
+Use this skill for manifest structure and metadata correctness. Use
+`tizen-privilege-audit` to compare declared privileges against source API usage,
+and `tizen-api-modernize` to find deprecated native APIs. This skill may point
+to those follow-up checks but should not remove privileges or scan all source
+APIs itself.
+
 ## Inputs
 
 - `target`: a path to `tizen-manifest.xml` or a directory containing one.

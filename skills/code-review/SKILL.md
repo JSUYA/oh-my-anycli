@@ -13,23 +13,64 @@ required_tools: [bash, read]
 
 ## Goal
 
-Review code changes and report actionable findings.
+Review the current branch or specified diff for correctness, regressions,
+security issues, and missing tests. This skill is read-only and should behave
+like a code review, not a refactor session.
+
+## Boundary
+
+Use this skill for broad diff review. Use `security-scan` for a dedicated local
+secret/unsafe-pattern sweep, `dead-code-finder` for unused-code analysis,
+`log-level-auditor` for debug logging, and domain review skills for CMake,
+Dockerfile, CI, shell, OpenAPI, or Tizen-specific checklists. A code review may
+flag those issues when seen in the diff, but it should not run every specialized
+scan by default.
 
 ## Workflow
 
-1. Read the user's request and identify the target files or project area.
-2. Gather only the local context needed for the task.
-3. Apply the skill's domain checklist with scoped, evidence-backed reasoning.
-4. Report findings, edits, or recommendations in English.
-5. Include verification steps or residual risks when relevant.
+1. Resolve the review range:
+   - use the user-specified commit/range when provided;
+   - otherwise use `git merge-base HEAD origin/main` when available, falling
+     back to `main`, `master`, or staged/unstaged diff.
+2. List changed files and skim the diff before reading full files:
+   ```bash
+   git diff --stat <range>
+   git diff --name-only <range>
+   git diff -- <file>
+   ```
+3. Read only the changed hunks plus enough surrounding context to understand
+   behavior. Read callers/callees only when a claim depends on them.
+4. Prioritize findings:
+   - correctness: null/empty cases, off-by-one, state mutation, error paths,
+     idempotency, concurrency, resource lifetime;
+   - security: validation, authn/authz, escaping, secrets, unsafe
+     deserialization, command/SQL injection;
+   - regressions: changed public contracts, removed defaults, data migrations;
+   - tests: missing coverage for new behavior or tests that assert too little.
+5. Avoid style comments unless the style issue can cause confusion or the diff
+   already has no higher-priority findings.
+6. For every finding, include `file:line`, why it matters, and the smallest
+   suggested fix. If no issue is found, say so and mention residual test gaps.
 
-## Output
+## Output Format
 
-Use concise English. Preserve code identifiers, file paths, command names, and API names exactly as they appear in the project.
+```markdown
+Verdict: BLOCKING | NITS | LGTM
+
+## Blocking
+- `src/auth.ts:42`: role is trusted from request body, so a normal user can
+  escalate privileges. Read role from the verified session instead.
+
+## Tests
+- missing: regression test for unauthenticated access to `/admin`
+
+## Residual Risk
+One sentence.
+```
 
 ## Guardrails
 
-- Do not invent facts, test results, issue links, or external references.
-- Do not make unrelated edits.
-- Do not perform destructive actions without explicit user approval.
-- Keep examples generic and free of sensitive or organization-specific data.
+- Do not edit files.
+- Do not review unrelated files just because they are nearby.
+- Do not invent merge-base, CI, or test results.
+- Do not bury blocking findings under summaries.

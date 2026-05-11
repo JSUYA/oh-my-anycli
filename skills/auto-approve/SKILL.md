@@ -17,6 +17,13 @@ gets auto-approved, and what the limitations are. Auto-approve is a
 so the answer is always "relaunch with `--auto-approve`" — there is no
 in-TUI toggle today.
 
+## Boundary
+
+Use this skill for opencode permission prompts such as "Allow this edit?" or
+"stop asking me". Use `sudo-helper` for interactive subprocess input such as
+sudo passwords, `ssh-add`, or `gh auth login`; those are TTY/stdin problems, not
+auto-approve problems.
+
 ## Two layers of permission to understand
 
 OpenCode-AnyCLI wraps two agents that each have their own permission gate:

@@ -1,6 +1,8 @@
 # Agent Authoring
 
-Agents are subagent definitions stored as `agents/<name>.md`.
+Agents are markdown definitions stored as `agents/<name>.md`. Most are strict
+subagents. Coordinator agents may use `mode: all` only when they are explicitly
+allow-listed by the test suite.
 
 ## Frontmatter
 
@@ -19,7 +21,8 @@ tools:
 
 Required constraints:
 
-- `mode` must be `subagent`.
+- `mode` must be `subagent`, except audited coordinator agents such as
+  `orchestrator` which use `mode: all`.
 - `model` must be `cline/default`.
 - Tool access must be explicit.
 

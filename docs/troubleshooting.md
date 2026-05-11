@@ -48,7 +48,10 @@ mode: subagent
 model: cline/default
 ```
 
-Unsupported or missing models are rejected because OpenCode-AnyCLI exposes `cline/default`.
+Unsupported or missing models are rejected because OpenCode-AnyCLI exposes
+`cline/default`. `orchestrator` is the only built-in `mode: all` exception so it
+can be selected as a coordinator; new exceptions must be added to the agent lint
+allow-list deliberately.
 
 ## Plugin does not install
 

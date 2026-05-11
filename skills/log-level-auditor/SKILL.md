@@ -13,23 +13,47 @@ required_tools: [bash, read, grep]
 
 ## Goal
 
-Audit logging statements and recommend project logger usage.
+Find debug or inappropriate logging statements and recommend fixes that match
+the project's logging conventions.
 
 ## Workflow
 
-1. Read the user's request and identify the target files or project area.
-2. Gather only the local context needed for the task.
-3. Apply the skill's domain checklist with scoped, evidence-backed reasoning.
-4. Report findings, edits, or recommendations in English.
-5. Include verification steps or residual risks when relevant.
+1. Resolve scope from the user or default to source directories. Skip generated,
+   vendor, build output, and lockfiles.
+2. Detect the project logger by grepping for imports/usages such as `logger`,
+   `log`, `winston`, `pino`, `tracing`, `logrus`, `zap`, `ILogger`, or language
+   standard logging packages.
+3. Search for suspicious logging:
+   - JavaScript/TypeScript: `console.log`, `console.debug`, `debugger`;
+   - Python: `print(` outside scripts/tests;
+   - Go: `fmt.Println`, `log.Println` in libraries;
+   - Rust: `dbg!`, `println!` in non-CLI code;
+   - Ruby: `puts`, `p`;
+   - C/C++: `printf`, `std::cout` in library/runtime code.
+4. Classify:
+   - HIGH: logs secrets, tokens, passwords, PII, request bodies, or credentials;
+   - MEDIUM: debug logs in production path or noisy loops;
+   - LOW: style mismatch where project logger is available.
+5. Recommend removal or replacement with the detected logger and an appropriate
+   level (`debug`, `info`, `warn`, `error`).
 
-## Output
+## Output Format
 
-Use concise English. Preserve code identifiers, file paths, command names, and API names exactly as they appear in the project.
+```markdown
+### Log audit
+
+#### HIGH
+- `src/auth.ts:42`: logs `Authorization` header.
+  fix: remove the value or log only request id.
+
+#### MEDIUM
+- `src/worker.ts:88`: `console.log` inside hot loop; use `logger.debug` behind
+  existing sampling or remove.
+```
 
 ## Guardrails
 
-- Do not invent facts, test results, issue links, or external references.
-- Do not make unrelated edits.
-- Do not perform destructive actions without explicit user approval.
-- Keep examples generic and free of sensitive or organization-specific data.
+- Do not flag CLI output, tests, examples, or one-off scripts as production
+  logging unless the project treats them as production code.
+- Do not remove logs automatically.
+- Do not recommend a new logging library when one already exists.

@@ -8,7 +8,7 @@ Oh-My-AnyCLI is a markdown-first artifact collection for OpenCode-AnyCLI. It has
 | --- | --- |
 | `skills/<name>/SKILL.md` | Reusable workflow instructions with YAML frontmatter. |
 | `commands/<name>.md` | Slash command wrappers that route a user request to a workflow. |
-| `agents/<name>.md` | Subagent definitions pinned to `model: cline/default`. |
+| `agents/<name>.md` | Agent definitions pinned to `model: cline/default`; most use `mode: subagent`, with audited exceptions for coordinator agents. |
 | `plugins/<name>/` | Optional shareable extension packages. |
 | `custom/` | Local-only user additions; not managed as upstream artifacts. |
 | `install.sh` | Copies artifacts into the OpenCode-AnyCLI target config. |
@@ -30,6 +30,8 @@ Plugins are installed with prefixed names:
 ## Compatibility constraints
 
 - Agents must declare `model: cline/default`.
+- Agents must use `mode: subagent`, except audited coordinator agents such as
+  `orchestrator` which use `mode: all`.
 - Skills must use a `SKILL.md` file under a directory named after the skill.
 - Commands and agents are top-level markdown files.
 - Shell scripts are written for portable Bash and standard Unix tools.

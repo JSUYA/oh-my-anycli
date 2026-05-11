@@ -3,13 +3,14 @@
 # lint-agents.sh — verify every agent .md under agents/ (and optional plugin
 # subdirectories) conforms to the oh-my-anycli agent contract:
 #
-#   1. frontmatter contains `name`, `description`, `model`
+#   1. frontmatter contains `name`, `description`, `mode`, `model`
 #   2. `name` matches the filename (without .md)
 #   3. `model` is `cline/default` (only valid value — see below)
-#   4. `tools` (if present) uses the object form (`tools:` followed by indented
+#   4. `mode` is `subagent`, except audited top-level primary agents.
+#   5. `tools` (if present) uses the object form (`tools:` followed by indented
 #      `key: value` lines), NOT the array form (`tools: [a, b]`). opencode's
 #      schema rejects array-form tools with `Expected object | undefined`.
-#   5. body is non-empty
+#   6. body is non-empty
 #
 # WHY model must be `cline/default`:
 #   opencode-anycli exposes subagents through cline/default. Other model ids
@@ -34,6 +35,7 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 . "$ROOT_DIR/lib/common.sh"
 
 REQUIRED_MODEL="cline/default"
+ALL_MODE_AGENTS=( orchestrator )
 target_dir="${1:-$ROOT_DIR/agents}"
 
 if [ ! -d "$target_dir" ]; then
@@ -43,13 +45,21 @@ fi
 failures=0
 checked=0
 
+is_all_mode_agent() {
+  local needle="$1"
+  for a in "${ALL_MODE_AGENTS[@]}"; do
+    [ "$a" = "$needle" ] && return 0
+  done
+  return 1
+}
+
 while IFS= read -r -d '' agent; do
   checked=$(( checked + 1 ))
   rel="${agent#"$ROOT_DIR/"}"
 
   # 1. required frontmatter keys
-  if ! omac_frontmatter_require "$agent" name description model >/dev/null 2>&1; then
-    omac_log_check fail "$rel - missing required frontmatter: name, description, model"
+  if ! omac_frontmatter_require "$agent" name description mode model >/dev/null 2>&1; then
+    omac_log_check fail "$rel - missing required frontmatter: name, description, mode, model"
     failures=$(( failures + 1 ))
     continue
   fi
@@ -71,7 +81,25 @@ while IFS= read -r -d '' agent; do
     continue
   fi
 
-  # 4. tools (if present) must be object form, not array form.
+  # 4. mode must be subagent, except audited top-level primary agents.
+  actual_mode="$(omac_frontmatter_get "$agent" mode)"
+  case "$actual_mode" in
+    subagent) ;;
+    all)
+      if ! is_all_mode_agent "$expected"; then
+        omac_log_check fail "$rel - mode='all' is only allowed for: ${ALL_MODE_AGENTS[*]}"
+        failures=$(( failures + 1 ))
+        continue
+      fi
+      ;;
+    *)
+      omac_log_check fail "$rel - mode='$actual_mode' (required: 'subagent')"
+      failures=$(( failures + 1 ))
+      continue
+      ;;
+  esac
+
+  # 5. tools (if present) must be object form, not array form.
   # opencode rejects `tools: [a, b]` with "Expected object | undefined" — only
   # `tools:\n  bash: true\n  read: true` is accepted. Inspect the line that
   # opens the `tools:` key inside the frontmatter.
@@ -95,7 +123,7 @@ while IFS= read -r -d '' agent; do
     continue
   fi
 
-  # 5. body must be non-empty
+  # 6. body must be non-empty
   body_lines=$(awk '
     BEGIN { in_fm=0; opened=0 }
     NR==1 && $0=="---" { in_fm=1; opened=1; next }

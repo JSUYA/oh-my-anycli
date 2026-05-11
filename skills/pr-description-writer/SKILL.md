@@ -9,27 +9,59 @@ inputs:
 required_tools: [bash, read]
 ---
 
-# Pr Description Writer Skill
+# PR Description Writer Skill
 
 ## Goal
 
-Draft a pull request description from branch context.
+Draft a pull request description from local branch context, commits, and diff
+statistics while matching the project's existing template when one exists.
+
+## Boundary
+
+Use this skill for writing PR text. Use `branch-prep` to decide whether the
+branch is ready, and `git-commit-helper` to create or message a commit. This
+skill may mention blockers it observes, but it should not perform readiness
+repairs, rebases, pushes, or commits.
 
 ## Workflow
 
-1. Read the user's request and identify the target files or project area.
-2. Gather only the local context needed for the task.
-3. Apply the skill's domain checklist with scoped, evidence-backed reasoning.
-4. Report findings, edits, or recommendations in English.
-5. Include verification steps or residual risks when relevant.
+1. Resolve the base branch: user-provided value, then `origin/main`,
+   `origin/master`, `origin/develop`, `main`, `master`, `develop`.
+2. Gather context:
+   ```bash
+   git status --short
+   git log --oneline <base>..HEAD
+   git diff --stat <base>..HEAD
+   git diff --name-only <base>..HEAD
+   ```
+3. Read `.github/pull_request_template*`, `docs/`, or prior local PR templates
+   if present. Match section names and checkbox style.
+4. Group changes by intent: feature, fix, refactor, docs, tests, build/chore.
+5. Include testing evidence only from commands actually run. If no tests ran,
+   write "Not run" with the reason.
+6. Call out risk and rollback based on changed files: migrations, config,
+   public API, auth/security, release/versioning, or generated artifacts.
 
-## Output
+## Output Format
 
-Use concise English. Preserve code identifiers, file paths, command names, and API names exactly as they appear in the project.
+```markdown
+## Summary
+- <why this PR exists>
+
+## Changes
+- <grouped user-facing changes>
+
+## Testing
+- [x] `./tests/run-all.sh`
+- [ ] Not run: <reason>
+
+## Risk / Rollback
+<one concise paragraph>
+```
 
 ## Guardrails
 
-- Do not invent facts, test results, issue links, or external references.
-- Do not make unrelated edits.
-- Do not perform destructive actions without explicit user approval.
-- Keep examples generic and free of sensitive or organization-specific data.
+- Do not create or update the PR remotely from this skill.
+- Do not include issue or PR URLs unless the user explicitly supplied them.
+- Do not invent tests, reviewers, release dates, or deployment status.
+- Do not hide a dirty worktree; mention it.

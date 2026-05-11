@@ -15,23 +15,44 @@ required_tools: [bash, read, edit]
 
 ## Goal
 
-Write database migrations with rollback and verification notes.
+Write database migrations in the detected framework with rollback, safety notes,
+and verification steps.
 
 ## Workflow
 
-1. Read the user's request and identify the target files or project area.
-2. Gather only the local context needed for the task.
-3. Apply the skill's domain checklist with scoped, evidence-backed reasoning.
-4. Report findings, edits, or recommendations in English.
-5. Include verification steps or residual risks when relevant.
+1. Detect the migration framework from existing files and commands:
+   Rails, Django, Alembic, Prisma, Knex, golang-migrate, Flyway, Liquibase, or
+   project-specific scripts.
+2. Read recent neighboring migrations and mirror naming, transaction style,
+   timestamps, SQL dialect, helpers, and rollback conventions.
+3. Classify the requested change:
+   - ADDITIVE: new nullable column, new table, new index;
+   - NEEDS-CARE: default/backfill, unique constraint, FK on existing data;
+   - DESTRUCTIVE: drop/rename/type narrowing/data rewrite.
+4. Prefer expand/contract patterns for risky changes:
+   add new shape -> backfill safely -> dual-read/write if needed -> remove old
+   shape in a later migration.
+5. Write forward and reverse paths when the framework supports it. If rollback
+   is impossible or unsafe, state why in the migration comment or output.
+6. Include verification commands using the project's existing migration tooling.
 
-## Output
+## Output Format
 
-Use concise English. Preserve code identifiers, file paths, command names, and API names exactly as they appear in the project.
+```markdown
+### Migration created
+- `db/migrate/20260511093000_add_email_verified_to_users.rb`
+
+Risk: NEEDS-CARE - backfill required before `NOT NULL`.
+
+Verification:
+- `bin/rails db:migrate`
+- `bin/rails db:rollback STEP=1`
+```
 
 ## Guardrails
 
-- Do not invent facts, test results, issue links, or external references.
-- Do not make unrelated edits.
-- Do not perform destructive actions without explicit user approval.
-- Keep examples generic and free of sensitive or organization-specific data.
+- Do not invent a migration framework if none exists.
+- Do not run migrations against a real database without explicit confirmation.
+- Do not combine destructive schema changes with data backfills unless the
+  existing project already does that safely.
+- Do not omit rollback discussion.

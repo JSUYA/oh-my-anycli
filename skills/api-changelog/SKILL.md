@@ -11,27 +11,76 @@ inputs:
 required_tools: [bash, read, grep]
 ---
 
-# Api Changelog Skill
+# API Changelog Skill
 
 ## Goal
 
-Compare API specs and report breaking, non-breaking, and additive changes.
+Compare two API specs or revisions and produce a reviewer-ready changelog
+that separates BREAKING, NON-BREAKING, and ADDITIVE changes. This skill is
+read-only; it does not rewrite specs.
+
+## Boundary
+
+Use this skill for cross-version API comparison. Use `openapi-validator` first
+when the task is to validate a single local OpenAPI/Swagger file or resolve
+`$ref`/schema consistency issues.
 
 ## Workflow
 
-1. Read the user's request and identify the target files or project area.
-2. Gather only the local context needed for the task.
-3. Apply the skill's domain checklist with scoped, evidence-backed reasoning.
-4. Report findings, edits, or recommendations in English.
-5. Include verification steps or residual risks when relevant.
+1. Resolve the old and new specs. Accept plain paths or `rev:path` syntax. If
+   only one path is provided, compare the merge-base version against the working
+   tree version when Git history is available.
+2. Identify the format before comparing:
+   - OpenAPI / Swagger: inspect `openapi`, `swagger`, `paths`, `components`,
+     `definitions`, and `security`.
+   - GraphQL SDL: inspect `type`, `input`, `enum`, `interface`, `union`,
+     directives, and field argument changes.
+3. Prefer structured parsing tools when present (`yq`, `jq`, `python -m
+   json.tool`, project OpenAPI tooling). Use text diffs only as a fallback and
+   label the result as shallow.
+4. Compare public surface area, not formatting:
+   - removed path, method, operationId, query/header/path parameter;
+   - parameter requiredness or type changes;
+   - request body requiredness, content type, schema, enum, min/max changes;
+   - response status removal, schema narrowing, enum value removal;
+   - authentication or scope becoming stricter;
+   - GraphQL field/type/enum removal, nullability tightening, or required
+     argument/input field additions.
+5. Classify each change:
+   - BREAKING: existing clients can fail or need code changes.
+   - NON-BREAKING: behavior or docs changed, existing clients should still work.
+   - ADDITIVE: new endpoint, field, enum value, optional parameter, or response.
+6. Include evidence: spec path, JSON pointer or GraphQL type/member, and old
+   value -> new value.
 
-## Output
+## Output Format
 
-Use concise English. Preserve code identifiers, file paths, command names, and API names exactly as they appear in the project.
+```markdown
+### API changelog
+
+Compared:
+- old: <path-or-rev>
+- new: <path-or-rev>
+
+#### BREAKING
+- `GET /v1/users/{id}` response `200#/properties/name`: `string` -> removed
+  impact: clients reading `name` fail or receive undefined
+
+#### NON-BREAKING
+- `POST /v1/users` description changed; no schema change detected
+
+#### ADDITIVE
+- `GET /v1/users` optional query parameter `includeInactive`
+
+#### Verification
+- parser/tool used, or "shallow text comparison only" with reason
+```
 
 ## Guardrails
 
-- Do not invent facts, test results, issue links, or external references.
-- Do not make unrelated edits.
-- Do not perform destructive actions without explicit user approval.
-- Keep examples generic and free of sensitive or organization-specific data.
+- Do not call an online API diff service or upload specs.
+- Do not mark formatting, description-only, or example-only changes as breaking.
+- Do not assume removing an undocumented field is safe; if it appears in the
+  schema, treat removal as breaking.
+- Do not invent semantic behavior from names alone. If the spec lacks detail,
+  call out the uncertainty.

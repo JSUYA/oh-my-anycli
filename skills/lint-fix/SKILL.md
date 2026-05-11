@@ -13,23 +13,52 @@ required_tools: [bash, read, edit]
 
 ## Goal
 
-Run the configured linter and apply safe fixes with approval.
+Run the configured linter, separate auto-fixable issues from risky ones, and
+apply fixes only when the request explicitly allows edits.
+
+## Boundary
+
+Use this skill for the project's generic configured lint command. Prefer
+language/domain-specific skills when the user names their tool or domain:
+`rust-clippy-triage` for `cargo clippy`, `cpp-static-analysis` for
+`clang-tidy`/`cppcheck`, and `csharp-analyzer-fix` for Roslyn or
+`dotnet format`. Use `refactor-helper` for behavior-preserving code changes not
+driven by linter diagnostics.
 
 ## Workflow
 
-1. Read the user's request and identify the target files or project area.
-2. Gather only the local context needed for the task.
-3. Apply the skill's domain checklist with scoped, evidence-backed reasoning.
-4. Report findings, edits, or recommendations in English.
-5. Include verification steps or residual risks when relevant.
+1. Detect configured linters from project files: `package.json`, `pyproject.toml`,
+   `ruff.toml`, `.eslintrc*`, `Cargo.toml`, `go.mod`, `.golangci.yml`,
+   `.clang-tidy`, `.editorconfig`, `Makefile`, and CI.
+2. Run the narrowest safe lint command for the requested target. Do not install
+   tools or invent a new linter.
+3. Classify results:
+   - SAFE-AUTOFIX: formatting/import/order changes with project tooling;
+   - NEEDS-REVIEW: code transformations, public API changes, broad rewrites;
+   - FALSE-POSITIVE: generated/vendor/test fixture or intentional suppression.
+4. If edits are allowed, apply only SAFE-AUTOFIX items and keep changes scoped
+   to lint output. Otherwise, present the patch plan.
+5. Re-run the same lint command after edits and report exact output summary.
 
-## Output
+## Output Format
 
-Use concise English. Preserve code identifiers, file paths, command names, and API names exactly as they appear in the project.
+```markdown
+### Lint result
+Command: `npm run lint -- src/foo.ts`
+
+#### Fixed
+- `src/foo.ts`: import order
+
+#### Needs review
+- `src/api.ts:42`: `no-explicit-any`; requires choosing a public type
+
+#### Verification
+- `npm run lint -- src/foo.ts`: passed
+```
 
 ## Guardrails
 
-- Do not invent facts, test results, issue links, or external references.
-- Do not make unrelated edits.
-- Do not perform destructive actions without explicit user approval.
-- Keep examples generic and free of sensitive or organization-specific data.
+- Do not add or change linter configuration unless explicitly asked.
+- Do not silence diagnostics with blanket ignore comments.
+- Do not run formatters over unrelated files.
+- Do not claim autofix safety for behavior-changing transformations.

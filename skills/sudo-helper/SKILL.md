@@ -17,6 +17,14 @@ inside an OpenCode-AnyCLI session. The honest answer involves multiple
 layers and there is no single magic switch — explain each layer and the
 three practical workarounds.
 
+## Boundary
+
+Use this skill for commands that need interactive stdin, a TTY, or root
+privileges (`sudo`, `ssh-add`, `gh auth login`). Use `auto-approve` for
+opencode's own allow/deny prompts. `--allow-dangerously-skip-permissions`
+implies auto-approve, but it is recommended here only when the root/TTY problem
+requires full-session elevation.
+
 ## The TTY chain
 
 Three layers, each independently controlling whether the next layer can

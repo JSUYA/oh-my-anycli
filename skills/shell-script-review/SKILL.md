@@ -13,23 +13,50 @@ required_tools: [bash, read, grep]
 
 ## Goal
 
-Review shell scripts for safety and portability.
+Review shell scripts for safety, quoting, portability, and maintenance risks.
+
+## Boundary
+
+Use this skill for shell files and shell snippets when shell semantics are the
+main risk. Use `ci-config-validator` for CI workflow structure and
+`dockerfile-review` for Dockerfile layer/runtime concerns.
 
 ## Workflow
 
-1. Read the user's request and identify the target files or project area.
-2. Gather only the local context needed for the task.
-3. Apply the skill's domain checklist with scoped, evidence-backed reasoning.
-4. Report findings, edits, or recommendations in English.
-5. Include verification steps or residual risks when relevant.
+1. Resolve script paths from the user or changed files ending in `.sh`, `.bash`,
+   or `.zsh`.
+2. Identify the declared shell from the shebang. Do not apply Bash-only advice
+   to a POSIX `sh` script unless you also recommend changing the shebang.
+3. Run `shellcheck` if it is already installed. If not, perform manual checks.
+4. Apply the checklist:
+   - strict mode appropriate for the shell (`set -euo pipefail` for Bash);
+   - quoted variable expansions and `"$@"`;
+   - no parsing `ls`, unsafe word splitting, or glob surprises;
+   - `--` before user-controlled filename arguments;
+   - safe temp files (`mktemp`, traps) and cleanup;
+   - no unsafe `eval`, untrusted `source`, command injection, or silent `curl |
+     sh`;
+   - portability issues: `readlink -f`, `sed -i`, `find -printf`, arrays, and
+     Bash 4 features on macOS Bash 3.
+5. Rank findings by runtime breakage/security risk first; style last.
 
-## Output
+## Output Format
 
-Use concise English. Preserve code identifiers, file paths, command names, and API names exactly as they appear in the project.
+```markdown
+### Shell review
+
+#### HIGH
+- `install.sh:44`: unquoted `$target` can split paths with spaces.
+  fix: use `"$target"`.
+
+#### MEDIUM
+- `tests/matrix.sh:80`: `declare -A` requires Bash 4; macOS ships Bash 3.
+  fix: use a temp file or plain array.
+```
 
 ## Guardrails
 
-- Do not invent facts, test results, issue links, or external references.
-- Do not make unrelated edits.
-- Do not perform destructive actions without explicit user approval.
-- Keep examples generic and free of sensitive or organization-specific data.
+- Do not rewrite scripts from this review skill.
+- Do not require Bash when the script intentionally targets POSIX `sh`.
+- Do not suggest `set -e` blindly around commands where failure is intentionally
+  handled.

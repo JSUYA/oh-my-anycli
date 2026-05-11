@@ -15,23 +15,43 @@ required_tools: [bash, read, grep]
 
 ## Goal
 
-Explain code clearly for the requested audience.
+Explain an existing function, file, module, or flow at the requested depth while
+preserving exact identifiers and avoiding code changes.
 
 ## Workflow
 
-1. Read the user's request and identify the target files or project area.
-2. Gather only the local context needed for the task.
-3. Apply the skill's domain checklist with scoped, evidence-backed reasoning.
-4. Report findings, edits, or recommendations in English.
-5. Include verification steps or residual risks when relevant.
+1. Resolve the target path and optional symbol. If the target is ambiguous, list
+   the candidates and ask for a narrower target.
+2. Choose depth:
+   - `summary`: 3-5 sentences;
+   - `walkthrough`: execution-order bullets with file anchors;
+   - `deep-dive`: control flow, edge cases, callers/callees, and data shapes.
+3. Read the target first. Use grep for direct callers/callees only when needed
+   for the requested depth.
+4. Explain in execution order:
+   inputs -> important branches -> side effects -> return/output.
+5. Preserve identifiers exactly. Use `file:line` anchors for non-obvious claims.
+6. Include "Surprises" only when behavior contradicts a name, comment, or common
+   expectation.
 
-## Output
+## Output Format
 
-Use concise English. Preserve code identifiers, file paths, command names, and API names exactly as they appear in the project.
+```markdown
+### `parseConfig` (`src/config.ts:18`)
+
+TL;DR: <one sentence>
+
+#### Walkthrough
+- `src/config.ts:19` reads `CONFIG_PATH`.
+- `src/config.ts:27` falls back to defaults when the file is absent.
+
+#### Surprises
+- `src/config.ts:44` mutates the exported `defaults` object.
+```
 
 ## Guardrails
 
-- Do not invent facts, test results, issue links, or external references.
-- Do not make unrelated edits.
-- Do not perform destructive actions without explicit user approval.
-- Keep examples generic and free of sensitive or organization-specific data.
+- Do not edit code.
+- Do not paraphrase identifiers.
+- Do not explain files you did not read.
+- Do not expand into a full architecture review; use `architect` for that.
