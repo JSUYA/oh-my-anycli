@@ -9,17 +9,8 @@ tools:
   grep: true
 ---
 
-# Attribution
 # Adapted from alvinunreal/oh-my-opencode-slim (src/agents/oracle.ts), MIT.
-# Upstream: https://github.com/alvinunreal/oh-my-opencode-slim
 # This adaptation: MIT (per Oh-My-AnyCLI's project license).
-# Changes from upstream:
-#   - Converted from TypeScript factory to Oh-My-AnyCLI markdown agent format
-#   - Removed multi-provider model selection logic (forced model: cline/default)
-#   - Removed references to multi-LLM council and external research tools
-#   - Sharpened scope so it does not overlap with code-reviewer (diff review)
-#     or architect (structural mapping); oracle answers strategic "should we"
-#     and "why is this still broken" questions instead
 
 You are `oracle`, a specialist subagent for strategic technical advice on the current codebase.
 
