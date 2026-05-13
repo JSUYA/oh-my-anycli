@@ -34,6 +34,29 @@ OMAC_TARGET_DIR="$fake_target" \
 expected_skills=$(find "$ROOT_DIR/skills" -mindepth 2 -name SKILL.md | wc -l | tr -d ' ')
 expected_commands=$(find "$ROOT_DIR/commands" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')
 expected_agents=$(find "$ROOT_DIR/agents" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')
+for plugin_dir in "$ROOT_DIR/plugins"/*/; do
+  [ -d "$plugin_dir" ] || continue
+  [ "$(basename "$plugin_dir")" = "examples" ] && continue
+  [ -f "$plugin_dir/plugin.json" ] || continue
+  if [ -d "$plugin_dir/skills" ]; then
+    expected_skills=$(( expected_skills + $(find "$plugin_dir/skills" -mindepth 2 -name SKILL.md | wc -l | tr -d ' ') ))
+  fi
+  if [ -d "$plugin_dir/commands" ]; then
+    expected_commands=$(( expected_commands + $(find "$plugin_dir/commands" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ') ))
+  fi
+  if [ -d "$plugin_dir/agents" ]; then
+    expected_agents=$(( expected_agents + $(find "$plugin_dir/agents" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ') ))
+  fi
+  if [ -d "$plugin_dir/opencode/skills" ]; then
+    expected_skills=$(( expected_skills + $(find "$plugin_dir/opencode/skills" -mindepth 2 -name SKILL.md | wc -l | tr -d ' ') ))
+  fi
+  if [ -d "$plugin_dir/opencode/commands" ]; then
+    expected_commands=$(( expected_commands + $(find "$plugin_dir/opencode/commands" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ') ))
+  fi
+  if [ -d "$plugin_dir/opencode/agents" ]; then
+    expected_agents=$(( expected_agents + $(find "$plugin_dir/opencode/agents" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ') ))
+  fi
+done
 
 # Count actually installed.
 actual_skills=$(find "$fake_target/skills" -mindepth 2 -name SKILL.md 2>/dev/null | wc -l | tr -d ' ')
@@ -75,6 +98,20 @@ if [ -s "$fake_target/.oh-my-anycli/manifest.txt" ]; then
   omac_log_check ok "manifest written"
 else
   omac_log_check fail "manifest missing or empty"
+  failures=$(( failures + 1 ))
+fi
+
+if [ -f "$fake_target/plugins/caveman.js" ] && [ -f "$fake_target/plugins/caveman-config.cjs" ]; then
+  omac_log_check ok "native opencode plugin files installed"
+else
+  omac_log_check fail "native opencode plugin files missing"
+  failures=$(( failures + 1 ))
+fi
+
+if grep -Fxq "<!-- caveman-begin -->" "$fake_target/AGENTS.md" 2>/dev/null; then
+  omac_log_check ok "managed AGENTS.md caveman block installed"
+else
+  omac_log_check fail "managed AGENTS.md caveman block missing"
   failures=$(( failures + 1 ))
 fi
 

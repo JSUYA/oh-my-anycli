@@ -82,6 +82,21 @@ walk_plugin() {
       omac_log_check ok "$rel/commands/ (lint-commands)"
     fi
   fi
+
+  if [ -d "$plugin_dir/opencode" ]; then
+    omac_log_check ok "$rel/opencode/ (native payload)"
+    local agents_append="$plugin_dir/opencode/AGENTS.append.md"
+    if [ -f "$agents_append" ]; then
+      local begin_marker="<!-- $(basename "$plugin_dir")-begin -->"
+      local end_marker="<!-- $(basename "$plugin_dir")-end -->"
+      if grep -Fxq "$begin_marker" "$agents_append" && grep -Fxq "$end_marker" "$agents_append"; then
+        omac_log_check ok "$rel/opencode/AGENTS.append.md (managed markers)"
+      else
+        omac_log_check fail "$rel/opencode/AGENTS.append.md - missing $begin_marker / $end_marker"
+        failures=$(( failures + 1 ))
+      fi
+    fi
+  fi
 }
 
 # Top-level plugins (skip examples/ directory itself, but walk into its

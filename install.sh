@@ -104,15 +104,19 @@ copied_skills=0;   skipped_skills=0
 copied_commands=0; skipped_commands=0
 copied_agents=0;   skipped_agents=0
 copied_plugins=0
+copied_opencode=0; skipped_opencode=0
 
 # Track artifacts we install so --prune can clean stale ones.
 manifest_dir="$TARGET_DIR/.oh-my-anycli"
 omac_ensure_dir "$manifest_dir"
 manifest_file="$manifest_dir/manifest.txt"
 new_manifest="$(mktemp)"
-trap 'rm -f "$new_manifest"' EXIT
+block_manifest_file="$manifest_dir/agents-blocks.txt"
+new_block_manifest="$(mktemp)"
+trap 'rm -f "$new_manifest" "$new_block_manifest"' EXIT
 
 record() { printf "%s\n" "$1" >> "$new_manifest"; }
+record_agents_block() { printf "%s|%s|%s\n" "$1" "$2" "$3" >> "$new_block_manifest"; }
 
 install_one() {
   # install_one <src> <dst>
@@ -130,6 +134,88 @@ install_one() {
   local src="$1" dst="$2"
   record "$dst"
   omac_copy_file "$src" "$dst" "$force"
+}
+
+install_tree_files() {
+  # install_tree_files <src-root> <dst-root>
+  #
+  # Copies every regular file below src-root to dst-root, preserving relative
+  # paths and recording each file in the install manifest. Used for native
+  # opencode plugin payloads that need full directories, not just SKILL.md.
+  local src_root="$1" dst_root="$2" src rel dst
+  [ -d "$src_root" ] || return 0
+  while IFS= read -r -d '' src; do
+    rel="${src#"$src_root"/}"
+    dst="$dst_root/$rel"
+    if install_one "$src" "$dst"; then
+      copied_opencode=$(( copied_opencode + 1 ))
+    else
+      skipped_opencode=$(( skipped_opencode + 1 ))
+    fi
+  done < <(find "$src_root" -type f -print0)
+}
+
+replace_or_append_block() {
+  # replace_or_append_block <src> <dst> <begin-marker> <end-marker>
+  #
+  # Installs a managed block into AGENTS.md without owning the whole file. The
+  # block itself is tracked separately so --prune can remove it when the plugin
+  # disappears while preserving user-authored AGENTS.md content.
+  local src="$1" dst="$2" begin="$3" end="$4" tmp last_char
+  [ -f "$src" ] || return 0
+  omac_ensure_dir "$(dirname "$dst")"
+
+  if [ ! -f "$dst" ]; then
+    cp "$src" "$dst"
+    copied_opencode=$(( copied_opencode + 1 ))
+    return 0
+  fi
+
+  tmp="$(mktemp)"
+  if grep -Fxq "$begin" "$dst" && grep -Fxq "$end" "$dst"; then
+    awk -v begin="$begin" -v end="$end" -v repl="$src" '
+      BEGIN {
+        while ((getline line < repl) > 0) replacement = replacement line ORS
+        close(repl)
+      }
+      $0 == begin { printf "%s", replacement; skipping=1; next }
+      skipping && $0 == end { skipping=0; next }
+      !skipping { print }
+    ' "$dst" > "$tmp"
+  else
+    cp "$dst" "$tmp"
+    if [ -s "$tmp" ]; then
+      last_char="$(tail -c 1 "$tmp" 2>/dev/null || true)"
+      [ "$last_char" = "" ] || printf "\n" >> "$tmp"
+      printf "\n" >> "$tmp"
+    fi
+    cat "$src" >> "$tmp"
+  fi
+
+  if cmp -s "$tmp" "$dst"; then
+    rm -f "$tmp"
+  elif [ -f "$dst" ] && [ "$force" != "--force" ] && grep -Fxq "$begin" "$dst"; then
+    rm -f "$tmp"
+    skipped_opencode=$(( skipped_opencode + 1 ))
+  else
+    mv "$tmp" "$dst"
+    copied_opencode=$(( copied_opencode + 1 ))
+  fi
+}
+
+remove_block_from_file() {
+  # remove_block_from_file <dst> <begin-marker> <end-marker>
+  local dst="$1" begin="$2" end="$3" tmp
+  [ -f "$dst" ] || return 0
+  grep -Fxq "$begin" "$dst" || return 0
+  grep -Fxq "$end" "$dst" || return 0
+  tmp="$(mktemp)"
+  awk -v begin="$begin" -v end="$end" '
+    $0 == begin { skipping=1; next }
+    skipping && $0 == end { skipping=0; next }
+    !skipping { print }
+  ' "$dst" > "$tmp"
+  mv "$tmp" "$dst"
 }
 
 # 4. skills/
@@ -248,6 +334,24 @@ if [ -d "$INSTALL_DIR/plugins" ]; then
         fi
       done
     fi
+
+    # Native opencode payloads are installed verbatim and unprefixed. Use this
+    # only for plugins that intentionally target opencode's own extension
+    # points, such as local JS plugins or opencode-native command files.
+    if [ -d "$plugin_dir/opencode" ]; then
+      install_tree_files "$plugin_dir/opencode/plugins"  "$TARGET_DIR/plugins"
+      install_tree_files "$plugin_dir/opencode/commands" "$TARGET_DIR/commands"
+      install_tree_files "$plugin_dir/opencode/skills"   "$TARGET_DIR/skills"
+      install_tree_files "$plugin_dir/opencode/agents"   "$TARGET_DIR/agents"
+
+      agents_append="$plugin_dir/opencode/AGENTS.append.md"
+      if [ -f "$agents_append" ]; then
+        begin_marker="<!-- ${plugin_name}-begin -->"
+        end_marker="<!-- ${plugin_name}-end -->"
+        record_agents_block "$TARGET_DIR/AGENTS.md" "$begin_marker" "$end_marker"
+        replace_or_append_block "$agents_append" "$TARGET_DIR/AGENTS.md" "$begin_marker" "$end_marker"
+      fi
+    fi
   done
 fi
 
@@ -294,15 +398,28 @@ if [ "$prune" = "1" ] && [ -f "$manifest_file" ]; then
   done < "$manifest_file"
 fi
 
+if [ "$prune" = "1" ] && [ -f "$block_manifest_file" ]; then
+  omac_log_step "Pruning stale managed AGENTS.md blocks"
+  while IFS='|' read -r block_file begin_marker end_marker; do
+    [ -n "$block_file" ] || continue
+    if ! grep -Fxq "$block_file|$begin_marker|$end_marker" "$new_block_manifest"; then
+      remove_block_from_file "$block_file" "$begin_marker" "$end_marker"
+      omac_log_debug "pruned managed AGENTS.md block $begin_marker"
+    fi
+  done < "$block_manifest_file"
+fi
+
 mv "$new_manifest" "$manifest_file"
+mv "$new_block_manifest" "$block_manifest_file"
 trap - EXIT
 
 # 9. Summary.
-omac_log_ok "$(printf "installed: %d skills (%d skipped), %d commands (%d skipped), %d agents (%d skipped), %d plugins" \
+omac_log_ok "$(printf "installed: %d skills (%d skipped), %d commands (%d skipped), %d agents (%d skipped), %d plugins, %d native opencode files (%d skipped)" \
   "$copied_skills" "$skipped_skills" \
   "$copied_commands" "$skipped_commands" \
   "$copied_agents" "$skipped_agents" \
-  "$copied_plugins")"
+  "$copied_plugins" \
+  "$copied_opencode" "$skipped_opencode")"
 
 cat <<'EOF'
 

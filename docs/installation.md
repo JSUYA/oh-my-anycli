@@ -24,6 +24,8 @@ By default, `install.sh` copies:
 - `commands/*.md` to `$OMAC_TARGET_DIR/commands/<name>.md`
 - `agents/*.md` to `$OMAC_TARGET_DIR/agents/<name>.md`
 - valid plugin artifacts from `plugins/<name>/`
+- native plugin payloads from `plugins/<name>/opencode/` to matching
+  `$OMAC_TARGET_DIR/{plugins,commands,skills,agents}/` paths
 
 It also links `omac` into `/usr/local/bin` when writable, otherwise `~/.local/bin`.
 

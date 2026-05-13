@@ -8,6 +8,13 @@ versioning follows [SemVer](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- `install.sh`: native opencode plugin payload support under
+  `plugins/<name>/opencode/`, copied into the target config without the
+  Oh-My-AnyCLI prefix.
+- Bundled MIT-licensed `caveman` plugin with upstream attribution, native
+  opencode plugin files, slash commands, skills, and managed AGENTS.md rules.
+- `tests/e2e-plugin.sh`: coverage for native opencode plugin install, manifest
+  tracking, managed AGENTS.md block installation, and prune removal.
 - `lib/common.sh`: `omac_frontmatter_block_get` for extracting multi-line
   frontmatter blocks (lists / nested objects) without changing the existing
   single-line parser semantics.

@@ -18,7 +18,15 @@ my-plugin/
 ├── README.md
 ├── skills/
 ├── commands/
-└── agents/
+├── agents/
+└── opencode/
+    ├── plugins/
+    ├── commands/
+    ├── skills/
+    └── AGENTS.append.md
 ```
+
+The optional `opencode/` directory is for native opencode payloads that must be
+installed without the Oh-My-AnyCLI prefix.
 
 See `plugins/examples/hello-world/` for a minimal example.

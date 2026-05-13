@@ -47,14 +47,42 @@ run_uninstall() {
 
 count() { find "$1" -mindepth "${2:-1}" -name "${3:-*}" -type f 2>/dev/null | wc -l | tr -d ' '; }
 
+expected_artifact_counts() {
+  expected_skills=$(find "$ROOT_DIR/skills" -mindepth 2 -name SKILL.md | wc -l | tr -d ' ')
+  expected_commands=$(find "$ROOT_DIR/commands" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')
+  expected_agents=$(find "$ROOT_DIR/agents" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')
+
+  for plugin_dir in "$ROOT_DIR/plugins"/*/; do
+    [ -d "$plugin_dir" ] || continue
+    [ "$(basename "$plugin_dir")" = "examples" ] && continue
+    [ -f "$plugin_dir/plugin.json" ] || continue
+    if [ -d "$plugin_dir/skills" ]; then
+      expected_skills=$(( expected_skills + $(find "$plugin_dir/skills" -mindepth 2 -name SKILL.md | wc -l | tr -d ' ') ))
+    fi
+    if [ -d "$plugin_dir/commands" ]; then
+      expected_commands=$(( expected_commands + $(find "$plugin_dir/commands" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ') ))
+    fi
+    if [ -d "$plugin_dir/agents" ]; then
+      expected_agents=$(( expected_agents + $(find "$plugin_dir/agents" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ') ))
+    fi
+    if [ -d "$plugin_dir/opencode/skills" ]; then
+      expected_skills=$(( expected_skills + $(find "$plugin_dir/opencode/skills" -mindepth 2 -name SKILL.md | wc -l | tr -d ' ') ))
+    fi
+    if [ -d "$plugin_dir/opencode/commands" ]; then
+      expected_commands=$(( expected_commands + $(find "$plugin_dir/opencode/commands" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ') ))
+    fi
+    if [ -d "$plugin_dir/opencode/agents" ]; then
+      expected_agents=$(( expected_agents + $(find "$plugin_dir/opencode/agents" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ') ))
+    fi
+  done
+}
+
 ###
 # 1. First install.
 ###
 omac_log_step "[1/7] first install"
 run_install
-expected_skills=$(find "$ROOT_DIR/skills" -mindepth 2 -name SKILL.md | wc -l | tr -d ' ')
-expected_commands=$(find "$ROOT_DIR/commands" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')
-expected_agents=$(find "$ROOT_DIR/agents" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')
+expected_artifact_counts
 
 actual_skills=$(count "$target/skills" 2 SKILL.md)
 actual_commands=$(count "$target/commands" 1 '*.md')
@@ -83,6 +111,18 @@ if [ -s "$target/.oh-my-anycli/manifest.txt" ]; then
   omac_log_check ok "manifest written"
 else
   omac_log_check fail "manifest missing or empty"
+  fail
+fi
+if [ -f "$target/plugins/caveman.js" ] && [ -f "$target/plugins/caveman-config.cjs" ]; then
+  omac_log_check ok "native opencode plugin files installed"
+else
+  omac_log_check fail "native opencode plugin files missing"
+  fail
+fi
+if grep -Fxq "<!-- caveman-begin -->" "$target/AGENTS.md" 2>/dev/null; then
+  omac_log_check ok "managed caveman AGENTS.md block installed"
+else
+  omac_log_check fail "managed caveman AGENTS.md block missing"
   fail
 fi
 
@@ -194,6 +234,12 @@ if [ -f "$custom" ]; then
 else
   omac_log_check fail "uninstall removed user file"
   fail
+fi
+if grep -Fxq "<!-- caveman-begin -->" "$target/AGENTS.md" 2>/dev/null; then
+  omac_log_check fail "uninstall left managed caveman AGENTS.md block behind"
+  fail
+else
+  omac_log_check ok "managed caveman AGENTS.md block removed by uninstall"
 fi
 
 printf "\n"

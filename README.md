@@ -8,7 +8,7 @@ Reusable skills, slash commands, and subagents for OpenCode-AnyCLI — pure mark
 - **40 slash commands** that route common tasks to those skills.
 - **12 subagents** pinned to `model: cline/default` for OpenCode-AnyCLI compatibility.
 - **`omac` CLI** for listing, searching, installing, updating, and diagnosing the collection.
-- **Plugin slot** for team- or project-specific extensions.
+- **Plugin slot** for team- or project-specific extensions, including native opencode payloads such as the bundled MIT-licensed `caveman` plugin.
 
 ## Install
 
