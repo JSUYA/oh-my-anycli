@@ -1,0 +1,11 @@
+{
+  "name": "caveman",
+  "version": "0.1.0",
+  "description": "Native opencode caveman mode plugin, commands, skills, and AGENTS.md ruleset.",
+  "license": "MIT",
+  "upstream": {
+    "repository": "https://github.com/JuliusBrussee/caveman",
+    "commit": "63a91ecadbf4c4719a4602a5abb00883f9966034",
+    "copyright": "Copyright (c) 2026 Julius Brussee"
+  }
+}

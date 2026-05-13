@@ -9,8 +9,8 @@
 #   2. Promote plugins/examples/hello-world to plugins/hello-world inside the
 #      fake clone, so install.sh actually picks it up (top-level
 #      plugins/examples/ is intentionally skipped by install.sh).
-#   3. Run install.sh against an isolated target. Verify the plugin's
-#      artifacts land with the `hello-world__` prefix.
+#   3. Run install.sh against an isolated target. Verify prefixed plugin
+#      artifacts and native opencode plugin payloads land in the target.
 #   4. Remove the plugin directory in the fake clone, run install --prune.
 #      Verify prefixed artifacts disappear.
 #   5. Confirm omac plugin list / add-from-tarball does the right thing
@@ -63,6 +63,11 @@ run_install
 plugin_skill="$target/skills/hello-world__hello/SKILL.md"
 plugin_cmd="$target/commands/hello-world__hello.md"
 plugin_agent="$target/agents/hello-world__hello-agent.md"
+native_plugin="$target/plugins/caveman.js"
+native_config="$target/plugins/caveman-config.cjs"
+native_cmd="$target/commands/caveman.md"
+native_skill="$target/skills/caveman/SKILL.md"
+agents_md="$target/AGENTS.md"
 
 if [ -f "$plugin_skill" ]; then
   omac_log_check ok "plugin skill installed (hello-world__hello)"
@@ -93,6 +98,35 @@ for f in "$plugin_skill" "$plugin_cmd" "$plugin_agent"; do
     fail
   fi
 done
+
+for f in "$native_plugin" "$native_config" "$native_cmd" "$native_skill"; do
+  if [ -f "$f" ]; then
+    omac_log_check ok "native opencode payload installed ($(basename "$f"))"
+  else
+    omac_log_check fail "native opencode payload missing: $f"
+    fail
+  fi
+  if grep -Fxq "$f" "$manifest"; then
+    omac_log_check ok "manifest tracks native $(basename "$f")"
+  else
+    omac_log_check fail "manifest missing native $(basename "$f")"
+    fail
+  fi
+done
+
+if grep -Fxq "<!-- caveman-begin -->" "$agents_md" && grep -Fxq "<!-- caveman-end -->" "$agents_md"; then
+  omac_log_check ok "managed caveman AGENTS.md block installed"
+else
+  omac_log_check fail "managed caveman AGENTS.md block missing"
+  fail
+fi
+
+if grep -Fxq "$agents_md|<!-- caveman-begin -->|<!-- caveman-end -->" "$target/.oh-my-anycli/agents-blocks.txt"; then
+  omac_log_check ok "managed AGENTS.md block manifest tracks caveman"
+else
+  omac_log_check fail "managed AGENTS.md block manifest missing caveman"
+  fail
+fi
 
 omac_log_step "[3/5] reject plugin agent with wrong model"
 bad_plugin="$fake_install/plugins/bad-plugin"
@@ -139,6 +173,23 @@ for f in "$plugin_skill" "$plugin_cmd" "$plugin_agent"; do
     omac_log_check ok "$(basename "$f") removed by --prune"
   fi
 done
+
+rm -rf "$fake_install/plugins/caveman"
+run_install --prune
+for f in "$native_plugin" "$native_config" "$native_cmd" "$native_skill"; do
+  if [ -f "$f" ]; then
+    omac_log_check fail "$(basename "$f") survived native plugin removal"
+    fail
+  else
+    omac_log_check ok "$(basename "$f") removed by native plugin --prune"
+  fi
+done
+if grep -Fxq "<!-- caveman-begin -->" "$agents_md" 2>/dev/null; then
+  omac_log_check fail "managed caveman AGENTS.md block survived native plugin removal"
+  fail
+else
+  omac_log_check ok "managed caveman AGENTS.md block removed by --prune"
+fi
 
 omac_log_step "[5/5] omac plugin add via local file:// bare repo"
 # Build a bare git repo from the example so omac plugin add can clone it.

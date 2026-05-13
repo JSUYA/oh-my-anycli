@@ -10,6 +10,7 @@ Oh-My-AnyCLI is a markdown-first artifact collection for OpenCode-AnyCLI. It has
 | `commands/<name>.md` | Slash command wrappers that route a user request to a workflow. |
 | `agents/<name>.md` | Agent definitions pinned to `model: cline/default`; most use `mode: subagent`, with audited exceptions for coordinator agents. |
 | `plugins/<name>/` | Optional shareable extension packages. |
+| `plugins/<name>/opencode/` | Native opencode payloads copied unprefixed into the target config. |
 | `custom/` | Local-only user additions; not managed as upstream artifacts. |
 | `install.sh` | Copies artifacts into the OpenCode-AnyCLI target config. |
 | `update.sh` | Runs `git pull --ff-only` and reapplies installed artifacts. |
@@ -26,6 +27,9 @@ Plugins are installed with prefixed names:
 - plugin skill: `skills/<plugin>__<skill>/SKILL.md`
 - plugin command: `commands/<plugin>__<command>.md`
 - plugin agent: `agents/<plugin>__<agent>.md`
+- native opencode plugin file: `plugins/<file>.js`
+- native opencode command/skill/agent: copied from `plugins/<name>/opencode/`
+  without prefix
 
 ## Compatibility constraints
 

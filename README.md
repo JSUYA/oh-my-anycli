@@ -40,7 +40,8 @@ copyrightable expression.
 - 40 slash commands that route common tasks to those skills.
 - 12 agents pinned to `model: cline/default` for OpenCode-AnyCLI compatibility: 11 strict subagents plus `orchestrator` exposed with `mode: all` so it can be selected as a coordinator. Two were adapted from `alvinunreal/oh-my-opencode-slim` (MIT): `orchestrator`, `oracle`.
 - A Bash `omac` helper for listing, searching, installing, updating, and diagnosing the collection.
-- A plugin slot for team- or project-specific extensions.
+- A plugin slot for team- or project-specific extensions, including native
+  opencode plugin payloads such as the bundled MIT-licensed `caveman` plugin.
 
 ## Coding Advantages Over Plain cline CLI
 

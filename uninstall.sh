@@ -11,8 +11,9 @@
 #   1. The `omac` symlink in /usr/local/bin or ~/.local/bin
 #   2. Every file listed in the manifest (skills/commands/agents that
 #      install.sh copied)
-#   3. The manifest file itself
-#   4. Empty parent directories (skills/<name>/, commands/, agents/)
+#   3. Managed AGENTS.md blocks listed in agents-blocks.txt
+#   4. The manifest files themselves
+#   5. Empty parent directories (skills/<name>/, commands/, agents/)
 #      that we own and that have no other files left
 #
 # What this does NOT touch:
@@ -109,6 +110,7 @@ done
 
 # ─── 2. Read manifest and remove our files ────────────────────────────────────
 manifest="$TARGET_DIR/.oh-my-anycli/manifest.txt"
+block_manifest="$TARGET_DIR/.oh-my-anycli/agents-blocks.txt"
 omac_log_step "Removing files listed in the install manifest"
 omac_log_info "target dir : $TARGET_DIR"
 omac_log_info "manifest   : $manifest"
@@ -131,6 +133,25 @@ else
 
   omac_log_ok "removed $removed file(s)$([ "$missing" -gt 0 ] && printf ", %d already missing" "$missing")"
 
+  if [ -f "$block_manifest" ]; then
+    block_removed=0
+    while IFS='|' read -r block_file begin_marker end_marker; do
+      [ -n "$block_file" ] || continue
+      [ -f "$block_file" ] || continue
+      grep -Fxq "$begin_marker" "$block_file" || continue
+      grep -Fxq "$end_marker" "$block_file" || continue
+      tmp="$(mktemp)"
+      awk -v begin="$begin_marker" -v end="$end_marker" '
+        $0 == begin { skipping=1; next }
+        skipping && $0 == end { skipping=0; next }
+        !skipping { print }
+      ' "$block_file" > "$tmp"
+      mv "$tmp" "$block_file"
+      block_removed=$(( block_removed + 1 ))
+    done < "$block_manifest"
+    omac_log_ok "removed $block_removed managed AGENTS.md block(s)"
+  fi
+
   # Clean up empty skill subdirectories (skills/<name>/ where SKILL.md was the only file).
   if [ -d "$TARGET_DIR/skills" ]; then
     for d in "$TARGET_DIR/skills"/*/; do
@@ -143,10 +164,11 @@ else
 
   # Remove now-empty manifest directory.
   rm -f "$manifest"
+  rm -f "$block_manifest"
   rmdir "$TARGET_DIR/.oh-my-anycli" 2>/dev/null || true
 
   # Optionally remove now-empty top-level dirs (commands/, agents/, skills/) — only if empty.
-  for sub in commands agents skills; do
+  for sub in commands agents skills plugins; do
     d="$TARGET_DIR/$sub"
     if [ -d "$d" ] && [ -z "$(ls -A "$d" 2>/dev/null)" ]; then
       rmdir "$d"
