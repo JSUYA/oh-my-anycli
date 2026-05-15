@@ -110,6 +110,31 @@ All agents are pinned to `model: cline/default`.
 - `security-auditor` — local-only sweep for secrets, unsafe patterns, risky deps
 - `test-writer` — unit and integration tests in the project's existing framework
 
+## Plugins
+
+Plugins package shareable skills, commands, and agents outside the core collection. Use `omac plugin add <git-url>` to install one, `omac plugin remove <name>` to remove it.
+
+**Bundled**
+- `caveman` — native opencode caveman mode (commands, skills, AGENTS.md ruleset); MIT-licensed payload from [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman)
+
+**Layout**
+
+```text
+my-plugin/
+├── plugin.json          # required: name, version, description
+├── skills/<name>/SKILL.md
+├── commands/<name>.md
+├── agents/<name>.md     # must declare model: cline/default
+└── opencode/            # optional: native opencode payload, copied unprefixed
+    ├── plugins/
+    ├── commands/
+    ├── skills/
+    ├── agents/
+    └── AGENTS.append.md # managed block in target AGENTS.md
+```
+
+Core artifacts install with a `<plugin>__` prefix (`skills/<plugin>__<skill>/SKILL.md`, etc.) to avoid collisions. Files under `opencode/` are copied verbatim without a prefix. See [docs/plugin-authoring.md](docs/plugin-authoring.md) for the full contract.
+
 ## Documentation
 
 - [Installation](docs/installation.md)
