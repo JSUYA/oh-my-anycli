@@ -28,6 +28,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "$SCRIPT_DIR/lib/log.sh"
 # shellcheck source=lib/common.sh
 . "$SCRIPT_DIR/lib/common.sh"
+# shellcheck source=lib/json-merge.sh
+. "$SCRIPT_DIR/lib/json-merge.sh"
 
 # Repository URL used by the auto-clone path (only when the script is run
 # from outside an existing checkout AND OMAC_INSTALL_DIR points at a
@@ -113,10 +115,17 @@ manifest_file="$manifest_dir/manifest.txt"
 new_manifest="$(mktemp)"
 block_manifest_file="$manifest_dir/agents-blocks.txt"
 new_block_manifest="$(mktemp)"
-trap 'rm -f "$new_manifest" "$new_block_manifest"' EXIT
+# Tracks file:// URLs registered into $TARGET_DIR/opencode.json's "plugin"
+# array. opencode does not auto-load .js files from a plugins/ dir, so we
+# must add an explicit entry per native plugin. The manifest lets --prune
+# unregister URLs whose source plugin has been removed.
+oc_plugin_manifest_file="$manifest_dir/opencode-plugins.txt"
+new_oc_plugin_manifest="$(mktemp)"
+trap 'rm -f "$new_manifest" "$new_block_manifest" "$new_oc_plugin_manifest"' EXIT
 
 record() { printf "%s\n" "$1" >> "$new_manifest"; }
 record_agents_block() { printf "%s|%s|%s\n" "$1" "$2" "$3" >> "$new_block_manifest"; }
+record_oc_plugin() { printf "%s\n" "$1" >> "$new_oc_plugin_manifest"; }
 
 install_one() {
   # install_one <src> <dst>
@@ -344,6 +353,29 @@ if [ -d "$INSTALL_DIR/plugins" ]; then
       install_tree_files "$plugin_dir/opencode/skills"   "$TARGET_DIR/skills"
       install_tree_files "$plugin_dir/opencode/agents"   "$TARGET_DIR/agents"
 
+      # Register every native JS module under opencode/plugins/ in
+      # $TARGET_DIR/opencode.json so opencode actually loads it at startup.
+      # Without this step, install_tree_files only drops the file on disk
+      # and the plugin's hooks never run — the historical bug behind
+      # caveman.js sitting unused after `omac plugin add`.
+      if [ -d "$plugin_dir/opencode/plugins" ]; then
+        while IFS= read -r -d '' src_js; do
+          case "$src_js" in
+            *.js|*.cjs|*.mjs) ;;
+            *) continue ;;
+          esac
+          rel="${src_js#"$plugin_dir/opencode/plugins"/}"
+          dst_js="$TARGET_DIR/plugins/$rel"
+          url="file://$dst_js"
+          if omac_json_plugin_add "$TARGET_DIR/opencode.json" "$url"; then
+            record_oc_plugin "$url"
+            omac_log_debug "registered opencode plugin: $url"
+          else
+            omac_log_warn "failed to register $url in $TARGET_DIR/opencode.json"
+          fi
+        done < <(find "$plugin_dir/opencode/plugins" -type f -print0 2>/dev/null)
+      fi
+
       agents_append="$plugin_dir/opencode/AGENTS.append.md"
       if [ -f "$agents_append" ]; then
         begin_marker="<!-- ${plugin_name}-begin -->"
@@ -409,8 +441,20 @@ if [ "$prune" = "1" ] && [ -f "$block_manifest_file" ]; then
   done < "$block_manifest_file"
 fi
 
+if [ "$prune" = "1" ] && [ -f "$oc_plugin_manifest_file" ]; then
+  omac_log_step "Pruning stale opencode.json plugin entries"
+  while IFS= read -r old_url; do
+    [ -n "$old_url" ] || continue
+    if ! grep -Fxq "$old_url" "$new_oc_plugin_manifest"; then
+      omac_json_plugin_remove "$TARGET_DIR/opencode.json" "$old_url" \
+        && omac_log_debug "unregistered $old_url"
+    fi
+  done < "$oc_plugin_manifest_file"
+fi
+
 mv "$new_manifest" "$manifest_file"
 mv "$new_block_manifest" "$block_manifest_file"
+mv "$new_oc_plugin_manifest" "$oc_plugin_manifest_file"
 trap - EXIT
 
 # 9. Summary.
