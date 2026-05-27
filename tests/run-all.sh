@@ -37,6 +37,7 @@ TESTS=(
   unit-frontmatter.sh
   verify-install.sh
   e2e-install.sh
+  e2e-selective.sh
   e2e-omac.sh
   e2e-plugin.sh
 )

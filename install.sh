@@ -100,6 +100,7 @@ fi
 omac_log_info "install dir : $INSTALL_DIR"
 omac_log_info "target dir  : $TARGET_DIR"
 omac_log_info "version     : $(omac_version)"
+omac_log_warn "install.sh is a legacy opencode bulk installer; prefer 'omac skill install <name>' and 'omac plugin install <name>'."
 
 # Counters
 copied_skills=0;   skipped_skills=0
@@ -140,9 +141,23 @@ install_one() {
   # exit code. Pre-0.4 versions used eval-based indirect variable assignment;
   # the explicit return code keeps the function pure-data-flow and removes the
   # shell-injection footgun.
-  local src="$1" dst="$2"
-  record "$dst"
+  local src="$1" dst="$2" rc
   omac_copy_file "$src" "$dst" "$force"
+  rc=$?
+  case "$rc" in
+    0)
+      record "$dst"
+      ;;
+    1)
+      # Only keep ownership for files this installer already owned. A
+      # pre-existing user file must not enter the manifest just because its
+      # path collides with an upstream artifact.
+      if [ -f "$manifest_file" ] && grep -Fxq "$dst" "$manifest_file"; then
+        record "$dst"
+      fi
+      ;;
+  esac
+  return "$rc"
 }
 
 install_tree_files() {

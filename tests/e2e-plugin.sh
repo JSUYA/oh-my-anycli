@@ -229,19 +229,56 @@ else
   fail
 fi
 if [ -f "$target/skills/hello-world__hello/SKILL.md" ]; then
-  omac_log_check ok "omac plugin add reapplied artifacts"
+  omac_log_check fail "omac plugin add installed artifacts without explicit install"
+  fail
 else
-  omac_log_check fail "omac plugin add did not reapply artifacts"
+  omac_log_check ok "omac plugin add only updates the registry"
+fi
+
+OMAC_INSTALL_DIR="$fake_install" OMAC_TARGET_DIR="$target" \
+  "$fake_install/omac" plugin install hello-world --target opencode >/dev/null
+
+if [ -f "$target/skills/hello-world__hello/SKILL.md" ]; then
+  omac_log_check ok "omac plugin install applied artifacts"
+else
+  omac_log_check fail "omac plugin install did not apply artifacts"
   fail
 fi
 
 OMAC_INSTALL_DIR="$fake_install" OMAC_TARGET_DIR="$target" \
   "$fake_install/omac" plugin remove hello-world >/dev/null
 
-if [ ! -d "$fake_install/plugins/hello-world" ]; then
-  omac_log_check ok "omac plugin remove deleted plugin dir"
+if [ ! -f "$target/skills/hello-world__hello/SKILL.md" ]; then
+  omac_log_check ok "omac plugin remove removed installed artifacts"
 else
-  omac_log_check fail "omac plugin remove kept plugin dir"
+  omac_log_check fail "omac plugin remove kept installed artifacts"
+  fail
+fi
+if [ -d "$fake_install/plugins/hello-world" ]; then
+  omac_log_check ok "omac plugin remove kept registry plugin"
+else
+  omac_log_check fail "omac plugin remove deleted registry plugin"
+  fail
+fi
+
+OMAC_INSTALL_DIR="$fake_install" OMAC_TARGET_DIR="$target" \
+  "$fake_install/omac" plugin delete hello-world >/dev/null
+
+if [ ! -d "$fake_install/plugins/hello-world" ]; then
+  omac_log_check ok "omac plugin delete removed registry plugin"
+else
+  omac_log_check fail "omac plugin delete kept registry plugin"
+  fail
+fi
+
+if OMAC_INSTALL_DIR="$fake_install" OMAC_TARGET_DIR="$target" \
+  "$fake_install/omac" plugin delete ../skills >/dev/null 2>&1; then
+  omac_log_check fail "path-traversal plugin delete unexpectedly succeeded"
+  fail
+elif [ -d "$fake_install/skills" ]; then
+  omac_log_check ok "path-traversal plugin delete rejected safely"
+else
+  omac_log_check fail "path-traversal plugin delete removed skills directory"
   fail
 fi
 

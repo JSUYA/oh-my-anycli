@@ -28,6 +28,8 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 tmpdir="$(mktemp -d -t omac-e2e-omac-XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 target="$tmpdir/target/opencode-anycli/opencode"
+claude_home="$tmpdir/claude"
+codex_home="$tmpdir/codex"
 mkdir -p "$target"
 
 # Pre-populate target so `omac list` has something to enumerate.
@@ -36,7 +38,7 @@ OMAC_TARGET_DIR="$target" \
 "$ROOT_DIR/install.sh" --no-symlink >/dev/null
 
 OMAC=( "$ROOT_DIR/omac" )
-ENV_VARS=( "OMAC_INSTALL_DIR=$ROOT_DIR" "OMAC_TARGET_DIR=$target" )
+ENV_VARS=( "OMAC_INSTALL_DIR=$ROOT_DIR" "OMAC_TARGET_DIR=$target" "OMAC_CLAUDE_HOME=$claude_home" "OMAC_CODEX_HOME=$codex_home" )
 
 run_omac() { env "${ENV_VARS[@]}" NO_COLOR=1 "${OMAC[@]}" "$@"; }
 
@@ -85,17 +87,17 @@ for kw in list search info plugin update reapply doctor; do
 done
 
 ###
-# list — every section header should appear.
+# list — universal skill/plugin matrix should appear.
 ###
 omac_log_step "[3/8] omac list"
 out="$(run_omac list 2>&1)"; rc=$?
 assert_exit "list exit code" 0 "$rc"
-assert_contains "list shows Skills section"   "Skills"   "$out"
-assert_contains "list shows Commands section" "Commands" "$out"
-assert_contains "list shows Agents section"   "Agents"   "$out"
-assert_contains "list shows Plugins section"  "Plugins"  "$out"
-assert_contains "list contains code-review skill name"   "code-review" "$out"
-assert_contains "list contains review.md command"        "review.md"   "$out"
+assert_contains "list shows universal view" "view: universal" "$out"
+assert_contains "list shows claude column" "claude" "$out"
+assert_contains "list shows codex column" "codex" "$out"
+assert_contains "list shows opencode column" "opencode" "$out"
+assert_contains "list contains code-review skill name" "code-review" "$out"
+assert_contains "list contains caveman plugin name" "caveman" "$out"
 
 ###
 # list -v  → also prints descriptions.

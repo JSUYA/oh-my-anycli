@@ -1,34 +1,99 @@
 # Oh-My-AnyCLI
 
-Reusable skills, slash commands, and subagents for OpenCode-AnyCLI — pure markdown + bash, no runtime.
+Reusable skills, slash commands, subagents, and plugins for multiple AI agent CLIs — pure markdown + bash, no runtime.
 
 ## What It Provides
 
-- **39 skills** for review, testing, docs, DevOps, DB, API, security, sandboxed browser testing, and language-specific workflows (C/C++, Rust, C#, Tizen).
-- **40 slash commands** that route common tasks to those skills.
+- **38 skills** for review, testing, docs, DevOps, DB, API, security, sandboxed browser testing, and language-specific workflows (C/C++, Rust, C#, Tizen).
+- **39 slash commands** that route common tasks to those skills.
 - **12 subagents** pinned to `model: cline/default` for OpenCode-AnyCLI compatibility.
-- **`omac` CLI** for listing, searching, installing, updating, and diagnosing the collection.
+- **`omac` CLI** for target-aware listing, searching, selected install/remove, updating, and diagnosing the collection.
 - **Plugin slot** for team- or project-specific extensions, including native opencode payloads such as the bundled MIT-licensed `caveman` plugin.
 
 ## Install
 
 ```bash
 git clone https://github.com/JSUYA/oh-my-anycli.git ~/.oh-my-anycli
-~/.oh-my-anycli/install.sh
-omac doctor
+~/.oh-my-anycli/install.sh --no-symlink
+~/.oh-my-anycli/omac skill list
+~/.oh-my-anycli/omac skill install code-review --target claude
 ```
+
+`install.sh` is kept as a legacy OpenCode bulk installer. Prefer `omac skill install` and `omac plugin install` for selected installs.
 
 ## Commands
 
 | Command | Purpose |
 | --- | --- |
-| `omac list [-v]` | List installed skills, commands, agents, and plugins. |
+| `omac list [-v]` | List universal skill/plugin status across Claude, Codex, and OpenCode targets. |
 | `omac search <keyword>` | Search frontmatter metadata. |
 | `omac info <name>` | Show one artifact's frontmatter. |
-| `omac plugin add <git-url>` | Add an external plugin. |
+| `omac skill list [--target universal\|claude\|codex\|opencode] [--global\|--local]` | List skills for one target or the universal matrix. |
+| `omac skill install <name\|all> [--target universal\|claude\|codex\|opencode]` | Install selected skill(s). |
+| `omac skill remove <name> [--target universal\|claude\|codex\|opencode]` | Remove managed selected skill installs. |
+| `omac plugin list [--target universal\|claude\|codex\|opencode]` | List plugin status for one target or the universal matrix. |
+| `omac plugin add <git-url>` | Add an external plugin to the local registry. |
+| `omac plugin install <name\|all> [--target universal\|claude\|codex\|opencode]` | Install selected plugin(s). |
+| `omac plugin remove <name> [--target universal\|claude\|codex\|opencode]` | Remove managed plugin artifacts but keep the registry copy. |
+| `omac plugin delete <name>` | Delete a plugin from the local registry. |
 | `omac update [--prune]` | Pull latest and reapply to your opencode config. |
 | `omac doctor` | Check installation status. |
 | `~/.oh-my-anycli/uninstall.sh` | Remove manifested files (keeps your own additions). |
+
+### Command Details
+
+Target option:
+
+- `--target universal` is the default view. It shows Claude, Codex, and OpenCode status side by side.
+- `--target claude`, `--target codex`, and `--target opencode` limit a command to one agent target.
+- For install/remove commands, `--target universal` applies to all supported targets.
+- `--global` uses the user's agent config roots. This is the default.
+- `--local` uses project-local roots: `.claude`, `.codex`, and `.opencode`.
+
+Status values:
+
+- `active`: installed by `omac` and identical to the registry source.
+- `modified`: installed by `omac`, but the target file was edited after install.
+- `present`: a matching file exists, but `omac` does not own it.
+- `missing`: no matching target artifact exists.
+
+Skill commands:
+
+- `omac skill list`: Shows every registry skill and whether it is installed for Claude, Codex, and OpenCode. Use `--target claude`, `--target codex`, or `--target opencode` to see one target only.
+- `omac skill status <name>`: Shows one skill's status and destination path per target.
+- `omac skill install <name>`: Copies one skill from `skills/<name>/SKILL.md` into the selected target. It refuses to overwrite unmanaged files unless `--force` is used.
+- `omac skill install all`: Installs every registry skill into the selected target.
+- `omac skill remove <name>`: Removes only files that `omac` owns through its selected-install manifest. Unmanaged user files are left in place.
+
+Plugin commands:
+
+- `omac plugin list`: Shows every registry plugin and whether its managed artifacts are installed for each target.
+- `omac plugin add <git-url>`: Clones the plugin into `plugins/<name>/` only. It updates the local registry, but does not install or activate the plugin in any agent.
+- `omac plugin install <name>`: Installs the selected plugin's supported artifacts into the selected target. OpenCode native payloads under `opencode/` are copied and JS plugin files are registered in `opencode.json`.
+- `omac plugin install all`: Installs every registry plugin into the selected target.
+- `omac plugin remove <name>`: Removes the plugin artifacts that `omac` installed for the selected target, but keeps `plugins/<name>/` in the registry.
+- `omac plugin delete <name>`: Deletes the plugin's registry checkout from `plugins/<name>/`. It does not replace `plugin remove`; remove installed artifacts first when needed.
+
+Compatibility alias:
+
+- `omac skills` is accepted as an alias for `omac skill`.
+
+Examples:
+
+```bash
+omac skill list
+omac skills --target universal list --global
+omac skill --target claude
+omac skill install code-review --target claude
+omac skill install all --target opencode
+omac skill remove code-review --target claude
+
+omac plugin add https://github.com/acme/my-omac-plugin.git
+omac plugin list
+omac plugin install my-omac-plugin --target opencode
+omac plugin remove my-omac-plugin --target opencode
+omac plugin delete my-omac-plugin
+```
 
 ## Skills
 
@@ -86,11 +151,10 @@ omac doctor
 - `tizen-api-modernize` — deprecated native API → recommended replacement
 - `tizen-manifest-review` — manifest API/profile/feature/category review
 - `tizen-privilege-audit` — declared privileges vs actual API usage
+- `tizen-sdb-helper` — picks safe `sdb` commands for Tizen device operations
 
 **Workflow & meta**
 - `branch-prep` — rebase, lint, test, push only after explicit confirmation
-- `auto-approve` — explains opencode-anycli auto-approve and how to enable it
-- `sudo-helper` — three workarounds for sudo inside an opencode-anycli session
 - `karpathy-guidelines` — behavioral guidelines: think before coding, surgical changes
 
 ## Agents

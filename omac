@@ -13,6 +13,10 @@ SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || pr
 . "$SCRIPT_DIR/lib/log.sh"
 # shellcheck source=lib/common.sh
 . "$SCRIPT_DIR/lib/common.sh"
+# shellcheck source=lib/json-merge.sh
+. "$SCRIPT_DIR/lib/json-merge.sh"
+# shellcheck source=lib/selective.sh
+. "$SCRIPT_DIR/lib/selective.sh"
 
 INSTALL_DIR="$(omac_install_dir)"
 TARGET_DIR="$(omac_target_dir)"
@@ -26,21 +30,30 @@ usage() {
 $(omac_color_bold "omac") — oh-my-anycli CLI ($(omac_version))
 
 Commands:
-  omac list [-v]                  list installed artifacts
+  omac list [-v]                  list universal skill/plugin matrix
   omac search <keyword>           search skills, commands, and agents
   omac info <name>                show one artifact's frontmatter
-  omac skill list                 list skills
+  omac skill list                 list skill install status by target
+  omac skill status <name>        show one skill's target status
+  omac skill install <name|all>   install selected skill(s)
+  omac skill remove <name>        remove selected skill from managed targets
   omac command list               list commands
   omac agent list                 list agents
-  omac plugin list                list plugins
-  omac plugin add <git-url>       add plugin
-  omac plugin remove <name>       remove plugin
+  omac plugin list                list plugin install status by target
+  omac plugin install <name|all>  install selected plugin(s)
+  omac plugin remove <name>       remove installed plugin artifacts
+  omac plugin add <git-url>       add plugin to local registry
+  omac plugin delete <name>       delete plugin from local registry
   omac update [--prune] [--no-stash]
                                   auto-stash dirty tree, git pull && reapply,
                                   then pop stash. --no-stash aborts on dirty.
   omac reapply                    install.sh --reapply
   omac doctor                     run installation diagnostics
   omac version                    print version
+Target options:
+  --target universal|claude|codex|opencode
+                                  choose the AI-agent target view/install set
+  --global | --local              choose user-global or project-local roots
 Installed counts:
   skills:   $skill_count
   commands: $cmd_count
@@ -87,8 +100,7 @@ list_dir_basenames() {
 }
 
 cmd_skill_list() {
-  printf "%b\n" "$(omac_color_bold "Skills [$TARGET_DIR/skills]")"
-  list_dir_basenames "$TARGET_DIR/skills" "" "$INSTALL_DIR/skills"
+  omac_cmd_skill_list_selective "$@"
 }
 
 cmd_command_list() {
@@ -102,46 +114,13 @@ cmd_agent_list() {
 }
 
 cmd_plugin_list() {
-  printf "%b\n" "$(omac_color_bold "Plugins [$INSTALL_DIR/plugins]")"
-  if [ ! -d "$INSTALL_DIR/plugins" ]; then
-    printf "  %b\n" "$(omac_color_dim "(plugins/ directory none)")"
-    return
-  fi
-  local found=0
-  for d in "$INSTALL_DIR/plugins"/*/; do
-    [ -d "$d" ] || continue
-    name="$(basename "$d")"
-    case "$name" in examples) continue ;; esac
-    found=1
-    if [ -f "$d/plugin.json" ]; then
-      ver="$(grep -E '"version"' "$d/plugin.json" | head -n1 | sed -E 's/.*"version"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/' || true)"
-      printf "  %s  %b\n" "$name" "$(omac_color_dim "(v${ver:-?})")"
-    else
-      printf "  %s  %b\n" "$name" "$(omac_color_yellow "(plugin.json none)")"
-    fi
-  done
-  [ "$found" = "0" ] && printf "  %b\n" "$(omac_color_dim "(none)")"
-  return 0
+  omac_cmd_plugin_list_selective "$@"
 }
 
 cmd_list_all() {
-  local skill_count cmd_count agent_count arg
-  for arg in "$@"; do
-    case "$arg" in
-      -v|--verbose) export LIST_VERBOSE=1 ;;
-      *) omac_die "unknown list option: $arg" ;;
-    esac
-  done
-  skill_count="$(omac_count "$TARGET_DIR/skills" 'SKILL.md')"
-  cmd_count="$(omac_count "$TARGET_DIR/commands" '*.md')"
-  agent_count="$(omac_count "$TARGET_DIR/agents" '*.md')"
-  printf "%b\n" "$(omac_color_dim "Installed artifacts: skills=$skill_count commands=$cmd_count agents=$agent_count")"
+  cmd_skill_list "$@"
   printf "\n"
-  cmd_skill_list;   printf "\n"
-  cmd_command_list; printf "\n"
-  cmd_agent_list;   printf "\n"
-  cmd_plugin_list
-  unset LIST_VERBOSE
+  cmd_plugin_list "$@"
 }
 
 # omac info <name> — print frontmatter as key:value lines for the named
@@ -246,19 +225,12 @@ cmd_plugin_add() {
   if [ ! -f "$dst/plugin.json" ]; then
     omac_log_warn "plugin.json not found in $name; install may be incomplete"
   fi
-  "$INSTALL_DIR/install.sh" --reapply
-  omac_log_ok "plugin added: $name"
+  omac_log_ok "plugin added to registry: $name"
+  omac_log_info "Install it with: omac plugin install $name --target universal"
 }
 
 cmd_plugin_remove() {
-  local name="${1:-}"
-  [ -n "$name" ] || omac_die "omac plugin remove <name>"
-  local dir="$INSTALL_DIR/plugins/$name"
-  [ -d "$dir" ] || omac_die "plugin not found: $name"
-  omac_log_step "Removing plugin $name"
-  rm -rf "$dir"
-  "$INSTALL_DIR/install.sh" --reapply --prune
-  omac_log_ok "plugin removed: $name"
+  omac_cmd_plugin_remove_selective "$@"
 }
 
 cmd_update()  { "$INSTALL_DIR/update.sh" "$@"; }
@@ -275,10 +247,24 @@ main() {
     list)    cmd_list_all "$@" ;;
     search)  cmd_search "${1:-}" ;;
     info)    cmd_info "${1:-}" ;;
-    skill)
-      case "${1:-list}" in
-        list) cmd_skill_list ;;
-        *) omac_die "omac skill list" ;;
+    skill|skills)
+      local action="" arg
+      local rest=()
+      for arg in "$@"; do
+        case "$arg" in
+          list|status|install|add|remove|rm|uninstall)
+            if [ -z "$action" ]; then action="$arg"; else rest+=("$arg"); fi
+            ;;
+          *) rest+=("$arg") ;;
+        esac
+      done
+      action="${action:-list}"
+      case "$action" in
+        list) cmd_skill_list "${rest[@]}" ;;
+        status) omac_cmd_skill_status_selective "${rest[@]}" ;;
+        install|add) omac_cmd_skill_install_selective "${rest[@]}" ;;
+        remove|rm|uninstall) omac_cmd_skill_remove_selective "${rest[@]}" ;;
+        *) omac_die "omac skill {list|status|install|remove}" ;;
       esac
       ;;
     command)
@@ -294,12 +280,24 @@ main() {
       esac
       ;;
     plugin)
-      local action="${1:-list}"; shift || true
+      local action="" arg
+      local rest=()
+      for arg in "$@"; do
+        case "$arg" in
+          list|install|add|remove|rm|uninstall|delete|del)
+            if [ -z "$action" ]; then action="$arg"; else rest+=("$arg"); fi
+            ;;
+          *) rest+=("$arg") ;;
+        esac
+      done
+      action="${action:-list}"
       case "$action" in
-        list)   cmd_plugin_list ;;
-        add)    cmd_plugin_add "$@" ;;
-        remove|rm) cmd_plugin_remove "$@" ;;
-        *) omac_die "omac plugin {list|add|remove}" ;;
+        list)   cmd_plugin_list "${rest[@]}" ;;
+        install) omac_cmd_plugin_install_selective "${rest[@]}" ;;
+        add)    cmd_plugin_add "${rest[@]}" ;;
+        remove|rm|uninstall) cmd_plugin_remove "${rest[@]}" ;;
+        delete|del) omac_cmd_plugin_delete_registry "${rest[0]:-}" ;;
+        *) omac_die "omac plugin {list|install|remove|add|delete}" ;;
       esac
       ;;
     update)  cmd_update "$@" ;;

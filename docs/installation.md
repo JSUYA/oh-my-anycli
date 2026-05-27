@@ -1,35 +1,65 @@
 # Installation
 
-Oh-My-AnyCLI installs reusable OpenCode-AnyCLI artifacts into the local OpenCode-AnyCLI config directory.
+Oh-My-AnyCLI manages reusable AI-agent artifacts through `omac`. Skills and
+plugins can be installed selectively into Claude, Codex, or OpenCode targets.
 
 ## Prerequisites
 
 - `git`
 - `bash`
-- OpenCode-AnyCLI installed or a writable target config directory
+- At least one writable target config directory for Claude, Codex, or OpenCode
 
-The default target directory is `~/.config/opencode-anycli/opencode`. Override it with `OMAC_TARGET_DIR`.
+Default global target roots:
+
+- Claude: `~/.claude`
+- Codex: `~/.codex`
+- OpenCode-AnyCLI: `~/.config/opencode-anycli/opencode`
+
+Override them with `OMAC_CLAUDE_HOME`, `OMAC_CODEX_HOME`, and `OMAC_TARGET_DIR`.
 
 ## Install
 
 ```bash
 git clone https://github.com/JSUYA/oh-my-anycli.git ~/.oh-my-anycli
-~/.oh-my-anycli/install.sh
-omac doctor
+~/.oh-my-anycli/install.sh --no-symlink
+~/.oh-my-anycli/omac skill list
 ```
 
-By default, `install.sh` copies:
+`install.sh` remains available as a legacy OpenCode bulk installer. For new
+usage, install only the skills/plugins you want:
 
-- `skills/*/SKILL.md` to `$OMAC_TARGET_DIR/skills/<name>/SKILL.md`
-- `commands/*.md` to `$OMAC_TARGET_DIR/commands/<name>.md`
-- `agents/*.md` to `$OMAC_TARGET_DIR/agents/<name>.md`
-- valid plugin artifacts from `plugins/<name>/`
-- native plugin payloads from `plugins/<name>/opencode/` to matching
-  `$OMAC_TARGET_DIR/{plugins,commands,skills,agents}/` paths
+```bash
+omac skill install code-review --target claude
+omac skill install karpathy-guidelines --target codex
+omac skill install tizen-api-modernize --target opencode
+omac plugin install caveman --target opencode
+```
 
-It also links `omac` into `/usr/local/bin` when writable, otherwise `~/.local/bin`.
+Use `--target universal` to target Claude, Codex, and OpenCode together, and
+`all` as the artifact name to install every registry item for the selected
+target:
 
-## Installer options
+```bash
+omac skill install all --target opencode
+omac plugin install all --target opencode
+```
+
+Use `--local` to install into project-local roots (`.claude`, `.codex`,
+`.opencode`) instead of global user config.
+
+## Status
+
+```bash
+omac skill list
+omac skill list --target claude --local
+omac skill status code-review
+omac plugin list
+```
+
+The universal list is the default and reports each artifact as `active`,
+`modified`, `present`, or `missing` per target.
+
+## Legacy installer options
 
 | Option | Meaning |
 | --- | --- |
@@ -44,7 +74,10 @@ It also links `omac` into `/usr/local/bin` when writable, otherwise `~/.local/bi
 | Variable | Meaning |
 | --- | --- |
 | `OMAC_INSTALL_DIR` | Override the checkout/install location. |
-| `OMAC_TARGET_DIR` | Override the OpenCode-AnyCLI config directory. |
+| `OMAC_CLAUDE_HOME` | Override the Claude global root. |
+| `OMAC_CODEX_HOME` | Override the Codex global root. |
+| `OMAC_TARGET_DIR` | Override the OpenCode-AnyCLI global root. |
+| `OMAC_LOCAL_DIR` | Override the project root used by `--local`. |
 | `OMAC_REPO_URL` | Override the repository cloned by the auto-clone path. |
 
 ## Uninstall
