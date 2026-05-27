@@ -8,7 +8,7 @@ Plugins extend Oh-My-AnyCLI with additional skills, commands, or agents.
 omac plugin add https://git.example.com/<your-org>/<plugin-repo>.git
 ```
 
-The plugin is cloned into `plugins/<name>/` and then installed into the OpenCode-AnyCLI config directory with prefixed artifact names.
+The plugin is cloned into `plugins/<name>/` and then installed into the selected target with prefixed artifact names. Native `opencode/` payloads still install only into the OpenCode-AnyCLI config directory.
 
 ## Plugin Shape
 

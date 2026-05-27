@@ -1,7 +1,7 @@
 # shellcheck shell=bash
 # Target-aware selective install helpers for omac.
 
-OMAC_ALL_TARGETS="claude codex opencode"
+OMAC_ALL_TARGETS="claude codex cline opencode"
 
 omac_validate_artifact_name() {
   local name="$1"
@@ -39,12 +39,16 @@ omac_set_target() {
       OMAC_VIEW="codex"
       OMAC_TARGETS="codex"
       ;;
+    cline)
+      OMAC_VIEW="cline"
+      OMAC_TARGETS="cline"
+      ;;
     opencode|open-code)
       OMAC_VIEW="opencode"
       OMAC_TARGETS="opencode"
       ;;
     *)
-      omac_die "unknown target: $target (expected universal, claude, codex, or opencode)"
+      omac_die "unknown target: $target (expected universal, claude, codex, cline, or opencode)"
       ;;
   esac
 }
@@ -71,6 +75,9 @@ omac_parse_selective_opts() {
         ;;
       --codex)
         omac_set_target codex
+        ;;
+      --cline)
+        omac_set_target cline
         ;;
       --opencode|--open-code)
         omac_set_target opencode
@@ -101,6 +108,7 @@ omac_target_root() {
     case "$target" in
       claude)   printf "%s/.claude" "$project_root" ;;
       codex)    printf "%s/.codex" "$project_root" ;;
+      cline)    printf "%s/.cline" "$project_root" ;;
       opencode) printf "%s/.opencode" "$project_root" ;;
       *) return 1 ;;
     esac
@@ -110,6 +118,7 @@ omac_target_root() {
   case "$target" in
     claude)   printf "%s" "${OMAC_CLAUDE_HOME:-$HOME/.claude}" ;;
     codex)    printf "%s" "${OMAC_CODEX_HOME:-$HOME/.codex}" ;;
+    cline)    printf "%s" "${OMAC_CLINE_HOME:-$HOME/.cline}" ;;
     opencode) omac_target_dir ;;
     *) return 1 ;;
   esac
@@ -240,13 +249,14 @@ omac_cmd_skill_list_selective() {
   printf "view: %s\n\n" "$OMAC_VIEW"
 
   if [ "$OMAC_VIEW" = "universal" ]; then
-    printf "%-30s %-10s %-10s %-10s\n" "skill" "claude" "codex" "opencode"
+    printf "%-30s %-10s %-10s %-10s %-10s\n" "skill" "claude" "codex" "cline" "opencode"
     while IFS= read -r name; do
       [ -n "$name" ] || continue
-      printf "%-30s %-10s %-10s %-10s\n" \
+      printf "%-30s %-10s %-10s %-10s %-10s\n" \
         "$name" \
         "$(omac_skill_status_for claude "$OMAC_SCOPE" "$name")" \
         "$(omac_skill_status_for codex "$OMAC_SCOPE" "$name")" \
+        "$(omac_skill_status_for cline "$OMAC_SCOPE" "$name")" \
         "$(omac_skill_status_for opencode "$OMAC_SCOPE" "$name")"
       if [ "$OMAC_VERBOSE" = "1" ]; then
         desc="$(omac_frontmatter_get "$(omac_skill_source "$name")" description 2>/dev/null || true)"
@@ -268,7 +278,7 @@ omac_cmd_skill_status_selective() {
   local name target
   omac_parse_selective_opts "$@"
   name="${OMAC_REST[0]:-}"
-  [ -n "$name" ] || omac_die "omac skill status <name> [--target universal|claude|codex|opencode] [--global|--local]"
+  [ -n "$name" ] || omac_die "omac skill status <name> [--target universal|claude|codex|cline|opencode] [--global|--local]"
   omac_validate_artifact_name "$name" || omac_die "invalid skill name: $name"
   [ -f "$(omac_skill_source "$name")" ] || omac_die "skill not found: $name"
   printf "%-10s %-10s %s\n" "target" "status" "path"
@@ -281,7 +291,7 @@ omac_cmd_skill_install_selective() {
   local name target root src dst failures=0
   omac_parse_selective_opts "$@"
   name="${OMAC_REST[0]:-}"
-  [ -n "$name" ] || omac_die "omac skill install <name|all> [--target universal|claude|codex|opencode] [--global|--local] [--force]"
+  [ -n "$name" ] || omac_die "omac skill install <name|all> [--target universal|claude|codex|cline|opencode] [--global|--local] [--force]"
 
   if [ "$name" = "all" ]; then
     while IFS= read -r name; do
@@ -307,7 +317,7 @@ omac_cmd_skill_remove_selective() {
   local name target root dst failures=0
   omac_parse_selective_opts "$@"
   name="${OMAC_REST[0]:-}"
-  [ -n "$name" ] || omac_die "omac skill remove <name> [--target universal|claude|codex|opencode] [--global|--local]"
+  [ -n "$name" ] || omac_die "omac skill remove <name> [--target universal|claude|codex|cline|opencode] [--global|--local]"
   omac_validate_artifact_name "$name" || omac_die "invalid skill name: $name"
   for target in $OMAC_TARGETS; do
     root="$(omac_target_root "$target" "$OMAC_SCOPE")"
@@ -380,13 +390,14 @@ omac_cmd_plugin_list_selective() {
   printf "scope: %s\n" "$OMAC_SCOPE"
   printf "view: %s\n\n" "$OMAC_VIEW"
   if [ "$OMAC_VIEW" = "universal" ]; then
-    printf "%-24s %-10s %-10s %-10s\n" "plugin" "claude" "codex" "opencode"
+    printf "%-24s %-10s %-10s %-10s %-10s\n" "plugin" "claude" "codex" "cline" "opencode"
     while IFS= read -r name; do
       [ -n "$name" ] || continue
-      printf "%-24s %-10s %-10s %-10s\n" \
+      printf "%-24s %-10s %-10s %-10s %-10s\n" \
         "$name" \
         "$(omac_plugin_status_for claude "$OMAC_SCOPE" "$name")" \
         "$(omac_plugin_status_for codex "$OMAC_SCOPE" "$name")" \
+        "$(omac_plugin_status_for cline "$OMAC_SCOPE" "$name")" \
         "$(omac_plugin_status_for opencode "$OMAC_SCOPE" "$name")"
       if [ "$OMAC_VERBOSE" = "1" ] && [ -f "$(omac_plugin_dir "$name")/plugin.json" ]; then
         ver="$(grep -E '"version"' "$(omac_plugin_dir "$name")/plugin.json" | head -n1 | sed -E 's/.*"version"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/' || true)"
@@ -455,7 +466,7 @@ omac_cmd_plugin_install_selective() {
   local name target root dir failures=0 sd sname src dst cmd cname agent aname model rel dst_js url begin end agents_append
   omac_parse_selective_opts "$@"
   name="${OMAC_REST[0]:-}"
-  [ -n "$name" ] || omac_die "omac plugin install <name|all> [--target universal|claude|codex|opencode] [--global|--local] [--force]"
+  [ -n "$name" ] || omac_die "omac plugin install <name|all> [--target universal|claude|codex|cline|opencode] [--global|--local] [--force]"
 
   if [ "$name" = "all" ]; then
     while IFS= read -r name; do
@@ -537,7 +548,7 @@ omac_cmd_plugin_remove_selective() {
   local name target root mf tmp kind rec_name rec_target path url block_file begin end failures=0
   omac_parse_selective_opts "$@"
   name="${OMAC_REST[0]:-}"
-  [ -n "$name" ] || omac_die "omac plugin remove <name> [--target universal|claude|codex|opencode] [--global|--local]"
+  [ -n "$name" ] || omac_die "omac plugin remove <name> [--target universal|claude|codex|cline|opencode] [--global|--local]"
   omac_validate_artifact_name "$name" || omac_die "invalid plugin name: $name"
 
   for target in $OMAC_TARGETS; do

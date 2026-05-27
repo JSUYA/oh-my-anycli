@@ -16,7 +16,7 @@ Oh-My-AnyCLI is a markdown-first artifact collection for AI-agent CLIs. It has n
 | `update.sh` | Runs `git pull --ff-only` and reapplies installed artifacts. |
 | `uninstall.sh` | Removes only manifest-tracked installed files. |
 | `omac` | Helper CLI for universal status, selected skill/plugin installs, search/info/update/doctor commands. |
-| `lib/selective.sh` | Target adapters and manifests for Claude, Codex, and OpenCode selected installs. |
+| `lib/selective.sh` | Target adapters and manifests for Claude, Codex, Cline, and OpenCode selected installs. |
 | `tests/` | Lint, unit, and end-to-end test suite — see `tests/run-all.sh`. |
 
 ## Installation model
@@ -29,9 +29,10 @@ Default global roots:
 
 - Claude: `~/.claude`
 - Codex: `~/.codex`
+- Cline: `~/.cline`
 - OpenCode-AnyCLI: `~/.config/opencode-anycli/opencode`
 
-Project-local installs use `.claude`, `.codex`, and `.opencode` under the
+Project-local installs use `.claude`, `.codex`, `.cline`, and `.opencode` under the
 current working directory or `OMAC_LOCAL_DIR`.
 
 Each target root has a selected-install manifest at

@@ -33,6 +33,8 @@ versioning follows [SemVer](https://semver.org/spec/v2.0.0.html).
   script.
 - `tests/ci.yml.sample` — sample GitHub Actions workflow that wires `run-all`
   into CI.
+- `omac --target cline`: selected skill installs for Cline's
+  `~/.cline/skills` and project-local `.cline/skills` directories.
 
 ### Changed
 

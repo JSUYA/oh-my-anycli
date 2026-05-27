@@ -25,16 +25,16 @@ git clone https://github.com/JSUYA/oh-my-anycli.git ~/.oh-my-anycli
 
 | Command | Purpose |
 | --- | --- |
-| `omac list [-v]` | List universal skill/plugin status across Claude, Codex, and OpenCode targets. |
+| `omac list [-v]` | List universal skill/plugin status across Claude, Codex, Cline, and OpenCode targets. |
 | `omac search <keyword>` | Search frontmatter metadata. |
 | `omac info <name>` | Show one artifact's frontmatter. |
-| `omac skill list [--target universal\|claude\|codex\|opencode] [--global\|--local]` | List skills for one target or the universal matrix. |
-| `omac skill install <name\|all> [--target universal\|claude\|codex\|opencode]` | Install selected skill(s). |
-| `omac skill remove <name> [--target universal\|claude\|codex\|opencode]` | Remove managed selected skill installs. |
-| `omac plugin list [--target universal\|claude\|codex\|opencode]` | List plugin status for one target or the universal matrix. |
+| `omac skill list [--target universal\|claude\|codex\|cline\|opencode] [--global\|--local]` | List skills for one target or the universal matrix. |
+| `omac skill install <name\|all> [--target universal\|claude\|codex\|cline\|opencode]` | Install selected skill(s). |
+| `omac skill remove <name> [--target universal\|claude\|codex\|cline\|opencode]` | Remove managed selected skill installs. |
+| `omac plugin list [--target universal\|claude\|codex\|cline\|opencode]` | List plugin status for one target or the universal matrix. |
 | `omac plugin add <git-url>` | Add an external plugin to the local registry. |
-| `omac plugin install <name\|all> [--target universal\|claude\|codex\|opencode]` | Install selected plugin(s). |
-| `omac plugin remove <name> [--target universal\|claude\|codex\|opencode]` | Remove managed plugin artifacts but keep the registry copy. |
+| `omac plugin install <name\|all> [--target universal\|claude\|codex\|cline\|opencode]` | Install selected plugin(s). |
+| `omac plugin remove <name> [--target universal\|claude\|codex\|cline\|opencode]` | Remove managed plugin artifacts but keep the registry copy. |
 | `omac plugin delete <name>` | Delete a plugin from the local registry. |
 | `omac update [--prune]` | Pull latest and reapply to your opencode config. |
 | `omac doctor` | Check installation status. |
@@ -44,11 +44,12 @@ git clone https://github.com/JSUYA/oh-my-anycli.git ~/.oh-my-anycli
 
 Target option:
 
-- `--target universal` is the default view. It shows Claude, Codex, and OpenCode status side by side.
-- `--target claude`, `--target codex`, and `--target opencode` limit a command to one agent target.
+- `--target universal` is the default view. It shows Claude, Codex, Cline, and OpenCode status side by side.
+- `--target claude`, `--target codex`, `--target cline`, and `--target opencode` limit a command to one agent target.
 - For install/remove commands, `--target universal` applies to all supported targets.
 - `--global` uses the user's agent config roots. This is the default.
-- `--local` uses project-local roots: `.claude`, `.codex`, and `.opencode`.
+- `--local` uses project-local roots: `.claude`, `.codex`, `.cline`, and `.opencode`.
+- Cline skills install to `~/.cline/skills` globally or `.cline/skills` locally; enable Skills in the Cline VS Code extension settings.
 
 Status values:
 
@@ -59,7 +60,7 @@ Status values:
 
 Skill commands:
 
-- `omac skill list`: Shows every registry skill and whether it is installed for Claude, Codex, and OpenCode. Use `--target claude`, `--target codex`, or `--target opencode` to see one target only.
+- `omac skill list`: Shows every registry skill and whether it is installed for Claude, Codex, Cline, and OpenCode. Use `--target claude`, `--target codex`, `--target cline`, or `--target opencode` to see one target only.
 - `omac skill status <name>`: Shows one skill's status and destination path per target.
 - `omac skill install <name>`: Copies one skill from `skills/<name>/SKILL.md` into the selected target. It refuses to overwrite unmanaged files unless `--force` is used.
 - `omac skill install all`: Installs every registry skill into the selected target.
@@ -85,6 +86,7 @@ omac skill list
 omac skills --target universal list --global
 omac skill --target claude
 omac skill install code-review --target claude
+omac skill install code-review --target cline
 omac skill install all --target opencode
 omac skill remove code-review --target claude
 

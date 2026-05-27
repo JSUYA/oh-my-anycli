@@ -16,13 +16,15 @@ trap 'rm -rf "$tmpdir"' EXIT
 
 claude_home="$tmpdir/claude"
 codex_home="$tmpdir/codex"
+cline_home="$tmpdir/cline"
 opencode_target="$tmpdir/opencode"
-mkdir -p "$claude_home" "$codex_home" "$opencode_target"
+mkdir -p "$claude_home" "$codex_home" "$cline_home" "$opencode_target"
 
 ENV_VARS=(
   "OMAC_INSTALL_DIR=$ROOT_DIR"
   "OMAC_CLAUDE_HOME=$claude_home"
   "OMAC_CODEX_HOME=$codex_home"
+  "OMAC_CLINE_HOME=$cline_home"
   "OMAC_TARGET_DIR=$opencode_target"
 )
 run_omac() { env "${ENV_VARS[@]}" NO_COLOR=1 "$ROOT_DIR/omac" "$@"; }
@@ -46,22 +48,33 @@ out="$(run_omac skill list --target universal)"
 assert_contains "skill list shows universal view" "view: universal" "$out"
 assert_contains "skill list shows code-review" "code-review" "$out"
 assert_contains "skill list shows target columns" "claude" "$out"
+assert_contains "skill list shows cline column" "cline" "$out"
 out="$(run_omac skills --target universal list --global)"
 assert_contains "target-before-action works" "view: universal" "$out"
 out="$(run_omac skill --target claude)"
 assert_contains "target claude view works" "view: claude" "$out"
+out="$(run_omac skill --target cline)"
+assert_contains "target cline view works" "view: cline" "$out"
 
 omac_log_step "[2/5] install one skill to one target"
 run_omac skill install code-review --target claude >/dev/null
-if [ -f "$claude_home/skills/code-review/SKILL.md" ] && [ ! -f "$codex_home/skills/code-review/SKILL.md" ]; then
+if [ -f "$claude_home/skills/code-review/SKILL.md" ] && [ ! -f "$codex_home/skills/code-review/SKILL.md" ] && [ ! -f "$cline_home/skills/code-review/SKILL.md" ]; then
   omac_log_check ok "code-review installed only to claude"
 else
   omac_log_check fail "code-review target selection failed"
   fail
 fi
+run_omac skill install karpathy-guidelines --target cline >/dev/null
+if [ -f "$cline_home/skills/karpathy-guidelines/SKILL.md" ] && [ ! -f "$claude_home/skills/karpathy-guidelines/SKILL.md" ]; then
+  omac_log_check ok "karpathy-guidelines installed only to cline"
+else
+  omac_log_check fail "cline skill target selection failed"
+  fail
+fi
 out="$(run_omac skill status code-review --target universal)"
 assert_contains "status marks claude active" "claude     active" "$out"
 assert_contains "status leaves codex missing" "codex      missing" "$out"
+assert_contains "status leaves cline missing" "cline      missing" "$out"
 
 omac_log_step "[3/5] unmanaged collision is not claimed"
 mkdir -p "$codex_home/skills/lint-fix"
@@ -88,7 +101,8 @@ fi
 
 omac_log_step "[4/5] remove managed skill"
 run_omac skill remove code-review --target claude >/dev/null
-if [ ! -f "$claude_home/skills/code-review/SKILL.md" ]; then
+run_omac skill remove karpathy-guidelines --target cline >/dev/null
+if [ ! -f "$claude_home/skills/code-review/SKILL.md" ] && [ ! -f "$cline_home/skills/karpathy-guidelines/SKILL.md" ]; then
   omac_log_check ok "managed skill removed"
 else
   omac_log_check fail "managed skill still present"
@@ -104,7 +118,7 @@ else
   fail
 fi
 out="$(run_omac plugin list --target universal)"
-assert_contains "plugin list marks opencode active" "caveman                  missing    missing    active" "$out"
+assert_contains "plugin list marks opencode active" "caveman                  missing    missing    missing    active" "$out"
 run_omac plugin remove caveman --target opencode >/dev/null
 if [ ! -f "$opencode_target/plugins/caveman.js" ] && ! grep -q "caveman.js" "$opencode_target/opencode.json" 2>/dev/null; then
   omac_log_check ok "caveman opencode plugin removed and unregistered"

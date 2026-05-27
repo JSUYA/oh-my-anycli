@@ -51,7 +51,7 @@ Commands:
   omac doctor                     run installation diagnostics
   omac version                    print version
 Target options:
-  --target universal|claude|codex|opencode
+  --target universal|claude|codex|cline|opencode
                                   choose the AI-agent target view/install set
   --global | --local              choose user-global or project-local roots
 Installed counts:

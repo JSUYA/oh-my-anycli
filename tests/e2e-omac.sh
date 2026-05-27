@@ -30,6 +30,7 @@ trap 'rm -rf "$tmpdir"' EXIT
 target="$tmpdir/target/opencode-anycli/opencode"
 claude_home="$tmpdir/claude"
 codex_home="$tmpdir/codex"
+cline_home="$tmpdir/cline"
 mkdir -p "$target"
 
 # Pre-populate target so `omac list` has something to enumerate.
@@ -38,7 +39,7 @@ OMAC_TARGET_DIR="$target" \
 "$ROOT_DIR/install.sh" --no-symlink >/dev/null
 
 OMAC=( "$ROOT_DIR/omac" )
-ENV_VARS=( "OMAC_INSTALL_DIR=$ROOT_DIR" "OMAC_TARGET_DIR=$target" "OMAC_CLAUDE_HOME=$claude_home" "OMAC_CODEX_HOME=$codex_home" )
+ENV_VARS=( "OMAC_INSTALL_DIR=$ROOT_DIR" "OMAC_TARGET_DIR=$target" "OMAC_CLAUDE_HOME=$claude_home" "OMAC_CODEX_HOME=$codex_home" "OMAC_CLINE_HOME=$cline_home" )
 
 run_omac() { env "${ENV_VARS[@]}" NO_COLOR=1 "${OMAC[@]}" "$@"; }
 
@@ -95,6 +96,7 @@ assert_exit "list exit code" 0 "$rc"
 assert_contains "list shows universal view" "view: universal" "$out"
 assert_contains "list shows claude column" "claude" "$out"
 assert_contains "list shows codex column" "codex" "$out"
+assert_contains "list shows cline column" "cline" "$out"
 assert_contains "list shows opencode column" "opencode" "$out"
 assert_contains "list contains code-review skill name" "code-review" "$out"
 assert_contains "list contains caveman plugin name" "caveman" "$out"
