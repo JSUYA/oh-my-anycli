@@ -1,6 +1,6 @@
 ---
 name: orchestrator
-description: Coordinator that plans and routes multi-step coding tasks across the existing roster of subagents. Read-only; never edits files itself. Uses mode: all so it can be selected from the primary agent picker.
+description: "Coordinator that plans and routes multi-step coding tasks across the existing roster of subagents. Read-only; never edits files itself. Uses mode: all so it can be selected from the primary agent picker."
 mode: all
 model: cline/default
 tools:
