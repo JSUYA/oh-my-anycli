@@ -216,3 +216,7 @@ Core artifacts install with a `<plugin>__` prefix (`skills/<plugin>__<skill>/SKI
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+Additional attribution: [skill_prompt.md](skill_prompt.md) adapts a public
+Codex skill-authoring prompt shared by reach_vb at
+https://x.com/reach_vb/status/2058538305872949490.

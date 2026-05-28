@@ -35,6 +35,8 @@ versioning follows [SemVer](https://semver.org/spec/v2.0.0.html).
   into CI.
 - `omac --target cline`: selected skill installs for Cline's
   `~/.cline/skills` and project-local `.cline/skills` directories.
+- `skill_prompt.md`: an adapted skill discovery and authoring prompt based on
+  a public Codex prompt shared by reach_vb.
 
 ### Changed
 
